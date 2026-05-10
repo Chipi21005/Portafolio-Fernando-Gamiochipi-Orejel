@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CV de Fernando Gamiochipi Orejel, estudiante de Ingeniería en Sistemas especializado en automatización con IA, desarrollo web, videovigilancia y soporte técnico.">
+  <title>Fernando Gamiochipi Orejel | CV</title>
+  <style>
+    :root {
+      --bg: #07100e;
+      --panel: rgba(13, 28, 25, 0.88);
+      --line: rgba(169, 244, 225, 0.15);
+      --line-strong: rgba(45, 226, 167, 0.36);
+      --text: #effaf7;
+      --muted: #abc1bb;
+      --soft: #7e9790;
+      --green: #2de2a7;
+      --blue: #38bdf8;
+      --gold: #f3c46b;
+      --red: #ff6b6b;
+      --shadow: 0 24px 70px rgba(0, 0, 0, 0.38);
+      --radius: 16px;
+      --radius-sm: 10px;
+      --max: 1160px;
+      --font: Inter, "Segoe UI", "SF Pro Display", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+      background: var(--bg);
+    }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      font-family: var(--font);
+      line-height: 1.6;
+      background:
+        radial-gradient(circle at 12% 0%, rgba(45, 226, 167, 0.13), transparent 30%),
+        radial-gradient(circle at 88% 10%, rgba(56, 189, 248, 0.13), transparent 30%),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+        var(--bg);
+      background-size: auto, auto, 88px 88px, 88px 88px, auto;
+      min-width: 320px;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; }
+    h1, h2, h3, p { margin: 0; }
+
+    .wrap {
+      width: min(100%, var(--max));
+      margin: 0 auto;
+      padding: 18px 16px 48px;
+    }
+
+    .skip {
+      position: absolute;
+      top: 12px;
+      left: 16px;
+      z-index: 10;
+      min-height: 44px;
+      padding: 10px 14px;
+      border: 1px solid var(--line-strong);
+      border-radius: 999px;
+      background: #10231f;
+      transform: translateY(-140%);
+    }
+    .skip:focus { transform: translateY(0); outline: none; }
+
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      margin: 0 -16px 18px;
+      padding: 10px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+      background: rgba(7, 16, 14, 0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+
+    .nav-inner {
+      width: min(100%, var(--max));
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 44px;
+      font-weight: 800;
+    }
+
+    .mark {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      border: 1px solid var(--line-strong);
+      background: linear-gradient(135deg, rgba(45, 226, 167, 0.22), rgba(56, 189, 248, 0.14));
+      color: var(--green);
+      font-size: 0.78rem;
+      font-weight: 900;
+    }
+
+    .nav-links {
+      display: none;
+      gap: 4px;
+    }
+
+    .nav-links a {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      transition: background 150ms ease, color 150ms ease;
+    }
+
+    .nav-links a:hover,
+    .nav-links a:focus-visible {
+      background: rgba(255, 255, 255, 0.07);
+      color: var(--text);
+      outline: none;
+    }
+
+    .window,
+    .hero,
+    .footer {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      overflow: clip;
+    }
+
+    .window {
+      transition: border-color 220ms ease;
+    }
+
+    .window:hover {
+      border-color: rgba(45, 226, 167, 0.22);
+    }
+
+    .bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 42px;
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: var(--red);
+    }
+    .dot:nth-child(2) { background: var(--gold); }
+    .dot:nth-child(3) { background: var(--green); }
+
+    .file {
+      margin-left: 6px;
+      color: var(--soft);
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .hero {
+      position: relative;
+      background:
+        linear-gradient(135deg, rgba(45, 226, 167, 0.11), transparent 40%),
+        linear-gradient(225deg, rgba(56, 189, 248, 0.11), transparent 38%),
+        var(--panel);
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 42px 0 0;
+      pointer-events: none;
+      background:
+        linear-gradient(90deg, rgba(255, 255, 255, 0.055) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: linear-gradient(180deg, black, transparent 70%);
+      opacity: 0.45;
+    }
+
+    .hero-body {
+      position: relative;
+      display: grid;
+      gap: 28px;
+      padding: 28px 18px 24px;
+    }
+
+    .intro {
+      display: grid;
+      gap: 20px;
+    }
+
+    .profile-photo {
+      width: 88px;
+      height: 88px;
+      border-radius: 50%;
+      object-fit: cover;
+      object-position: center top;
+      border: 2px solid rgba(45, 226, 167, 0.52);
+      box-shadow:
+        0 0 0 5px rgba(45, 226, 167, 0.10),
+        0 0 30px rgba(45, 226, 167, 0.18),
+        0 16px 40px rgba(0, 0, 0, 0.45);
+      display: block;
+      flex-shrink: 0;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: fit-content;
+      min-height: 32px;
+      padding: 5px 10px;
+      border: 1px solid rgba(45, 226, 167, 0.28);
+      border-radius: 999px;
+      background: rgba(45, 226, 167, 0.09);
+      color: #cafff2;
+      font-size: 0.78rem;
+      font-weight: 800;
+    }
+
+    .badge::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--green);
+      box-shadow: 0 0 18px rgba(45, 226, 167, 0.9);
+    }
+
+    h1 {
+      max-width: 780px;
+      color: #ffffff;
+      font-size: clamp(2.1rem, 10vw, 4.6rem);
+      line-height: 0.96;
+      font-weight: 900;
+    }
+
+    .subtitle {
+      max-width: 780px;
+      color: var(--muted);
+      font-size: clamp(0.95rem, 3.5vw, 1.3rem);
+    }
+    .subtitle strong { color: var(--text); }
+
+    .contact {
+      display: grid;
+      gap: 10px;
+      padding: 0;
+      margin: 0;
+      list-style: none;
+    }
+
+    .pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 44px;
+      padding: 10px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, 0.045);
+      color: var(--muted);
+      overflow-wrap: anywhere;
+      transition: border-color 150ms ease, background 150ms ease;
+    }
+
+    a.pill:hover,
+    a.pill:focus-visible {
+      border-color: rgba(45, 226, 167, 0.30);
+      background: rgba(45, 226, 167, 0.07);
+      outline: none;
+    }
+
+    .pill svg,
+    .btn svg {
+      width: 18px;
+      height: 18px;
+      flex: 0 0 auto;
+      color: var(--green);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      min-height: 44px;
+      padding: 10px 18px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text);
+      font-size: 0.92rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+    }
+
+    .btn:hover,
+    .btn:focus-visible {
+      transform: translateY(-1px);
+      border-color: var(--line-strong);
+      background: rgba(45, 226, 167, 0.11);
+      outline: none;
+    }
+
+    .primary {
+      border-color: rgba(45, 226, 167, 0.60);
+      background: linear-gradient(135deg, rgba(45, 226, 167, 0.95), rgba(56, 189, 248, 0.88));
+      color: #03110d;
+    }
+
+    .primary:hover,
+    .primary:focus-visible {
+      border-color: rgba(45, 226, 167, 0.88);
+      background: linear-gradient(135deg, #2de2a7, #38bdf8);
+      transform: translateY(-1px);
+    }
+
+    .primary svg { color: #03110d; }
+
+    .btn--disabled {
+      opacity: 0.42;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    main {
+      display: grid;
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity 600ms cubic-bezier(0.2, 0.8, 0.2, 1), transform 600ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .body { padding: 18px; }
+
+    .heading {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .kicker {
+      color: var(--green);
+      font-size: 0.75rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      white-space: nowrap;
+    }
+
+    .rule {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(45, 226, 167, 0.35), transparent);
+    }
+
+    h2 {
+      color: #ffffff;
+      font-size: clamp(1.2rem, 4.5vw, 1.65rem);
+      line-height: 1.2;
+      font-weight: 900;
+    }
+
+    .copy {
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.75;
+    }
+    .copy strong { color: var(--text); }
+
+    .timeline {
+      position: relative;
+      display: grid;
+      gap: 14px;
+    }
+
+    .timeline::before {
+      content: "";
+      position: absolute;
+      left: 10px;
+      top: 8px;
+      bottom: 8px;
+      width: 2px;
+      background: linear-gradient(180deg, var(--green), var(--blue), transparent);
+      border-radius: 999px;
+    }
+
+    .event {
+      position: relative;
+      padding-left: 30px;
+    }
+
+    .event::before {
+      content: "";
+      position: absolute;
+      left: 4px;
+      top: 10px;
+      width: 14px;
+      height: 14px;
+      border: 3px solid #0b1714;
+      border-radius: 999px;
+      background: var(--green);
+      box-shadow: 0 0 0 4px rgba(45, 226, 167, 0.1);
+    }
+
+    .mini-card,
+    .skill,
+    .project,
+    .reference,
+    .language {
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, 0.045);
+    }
+
+    .mini-card { padding: 15px; }
+
+    .item-title {
+      color: #ffffff;
+      font-size: 1rem;
+      line-height: 1.35;
+      font-weight: 800;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .period {
+      color: #d3fff3;
+      font-weight: 800;
+    }
+
+    .bullets {
+      display: grid;
+      gap: 7px;
+      padding: 0;
+      margin: 10px 0 0;
+      list-style: none;
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+
+    .bullets li {
+      position: relative;
+      padding-left: 18px;
+    }
+
+    .bullets li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.72em;
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--blue);
+    }
+
+    .education {
+      padding: 16px;
+      border-left: 3px solid var(--blue);
+    }
+
+    .grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .skills { display: grid; gap: 14px; }
+
+    .skill {
+      display: grid;
+      gap: 7px;
+      padding: 12px;
+    }
+
+    .skill-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--text);
+      font-size: 0.92rem;
+      font-weight: 800;
+    }
+
+    .skill-value { color: #cafff2; }
+
+    .track {
+      height: 8px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.22);
+    }
+
+    .fill {
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--green), var(--blue));
+      transition: width 1100ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 34px;
+      padding: 6px 13px;
+      border: 1px solid rgba(45, 226, 167, 0.22);
+      border-radius: 999px;
+      background: rgba(45, 226, 167, 0.07);
+      color: #d3fff4;
+      font-size: 0.88rem;
+      font-weight: 800;
+    }
+
+    .language,
+    .reference { padding: 15px; }
+
+    .language {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .project {
+      position: relative;
+      padding: 18px;
+      overflow: clip;
+      transition: transform 200ms ease, border-color 200ms ease, background 200ms ease;
+    }
+
+    .project:hover {
+      transform: translateY(-2px);
+      border-color: rgba(45, 226, 167, 0.30);
+      background: rgba(255, 255, 255, 0.055);
+    }
+
+    .project--pending { opacity: 0.76; }
+
+    .pending-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      margin-bottom: 12px;
+      border-radius: 999px;
+      background: rgba(243, 196, 107, 0.10);
+      border: 1px solid rgba(243, 196, 107, 0.28);
+      color: var(--gold);
+      font-size: 0.72rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .tech {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 0;
+      margin: 12px 0 0;
+      list-style: none;
+    }
+
+    .tech li {
+      min-height: 28px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.09);
+      border: 1px solid rgba(56, 189, 248, 0.14);
+      color: #d8f5ff;
+      font-size: 0.8rem;
+      font-weight: 800;
+    }
+
+    .reference { border-left: 3px solid rgba(243, 196, 107, 0.78); }
+
+    .phone {
+      color: #ffe0a3;
+      font-weight: 800;
+    }
+
+    .footer {
+      margin-top: 16px;
+      padding: 28px 18px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .footer strong {
+      display: block;
+      color: #ffffff;
+      margin-bottom: 8px;
+      font-size: 1.05rem;
+    }
+
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .footer-links a,
+    .footer-links span {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.045);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      color: var(--muted);
+      transition: background 150ms ease, border-color 150ms ease;
+    }
+
+    .footer-links a:hover,
+    .footer-links a:focus-visible {
+      background: rgba(45, 226, 167, 0.08);
+      border-color: rgba(45, 226, 167, 0.24);
+      color: var(--text);
+      outline: none;
+    }
+
+    .toast {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      z-index: 8;
+      max-width: calc(100vw - 32px);
+      padding: 12px 16px;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius-sm);
+      background: rgba(14, 28, 25, 0.96);
+      color: var(--text);
+      box-shadow: var(--shadow);
+      font-size: 0.92rem;
+      opacity: 0;
+      transform: translateY(12px);
+      pointer-events: none;
+      transition: opacity 180ms ease, transform 180ms ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    :focus-visible {
+      outline: 3px solid rgba(56, 189, 248, 0.72);
+      outline-offset: 3px;
+    }
+
+    @media (min-width: 640px) {
+      .wrap { padding: 24px 24px 56px; }
+
+      .nav {
+        margin-inline: -24px;
+        padding-inline: 24px;
+      }
+
+      .hero-body { padding: 36px 30px 30px; }
+
+      .intro {
+        grid-template-columns: auto 1fr;
+        align-items: start;
+      }
+
+      .profile-photo {
+        width: 108px;
+        height: 108px;
+      }
+
+      .contact,
+      .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .body { padding: 24px; }
+
+      .skills {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (min-width: 768px) {
+      .nav-links { display: flex; }
+
+      .hero-body {
+        grid-template-columns: 1.3fr 0.7fr;
+        align-items: end;
+      }
+
+      .side {
+        align-self: stretch;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 16px;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .wrap {
+        padding-top: 28px;
+        padding-bottom: 72px;
+      }
+
+      .hero-body { padding: 48px 44px 40px; }
+
+      .profile-photo {
+        width: 124px;
+        height: 124px;
+      }
+
+      .body { padding: 28px 30px; }
+
+      .skills {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+        scroll-behavior: auto !important;
+      }
+
+      .reveal {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    @media print {
+      :root {
+        --bg: #ffffff;
+        --panel: #ffffff;
+        --text: #111111;
+        --muted: #444444;
+        --soft: #666666;
+        --green: #0a7c55;
+        --blue: #1565c0;
+        --gold: #b07800;
+        --shadow: none;
+      }
+
+      *,
+      *::before,
+      *::after {
+        animation: none !important;
+        transition: none !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+      }
+
+      body {
+        background: #ffffff !important;
+        color: #111111;
+      }
+
+      .nav,
+      .skip,
+      .toast,
+      .actions,
+      .bar,
+      .hero::before {
+        display: none !important;
+      }
+
+      .wrap {
+        max-width: 100%;
+        padding: 0;
+      }
+
+      .hero,
+      .window,
+      .footer {
+        border: 1px solid #cccccc;
+        border-radius: 8px;
+        overflow: visible;
+        break-inside: avoid;
+        page-break-inside: avoid;
+        background: #ffffff !important;
+      }
+
+      .reveal {
+        opacity: 1 !important;
+        transform: none !important;
+      }
+
+      h1 { font-size: 2rem; color: #111111; line-height: 1.1; }
+      h2 { font-size: 1.25rem; color: #111111; }
+      h3 { color: #111111; }
+
+      .copy, .meta, .muted, .bullets li { color: #444444; }
+      .period { color: #111111; }
+      .kicker { color: #0a7c55; }
+      .rule { background: #ccc; }
+
+      .fill { background: #0a7c55 !important; }
+
+      .chip {
+        border: 1px solid #aaaaaa;
+        background: #f4f4f4;
+        color: #333333;
+      }
+
+      .tech li {
+        border: 1px solid #aaaaaa;
+        background: #f4f4f4;
+        color: #333333;
+      }
+
+      .badge {
+        background: #f0f0f0;
+        border: 1px solid #cccccc;
+        color: #444444;
+      }
+
+      .badge::before { background: #0a7c55; box-shadow: none; }
+
+      .profile-photo {
+        border: 2px solid #cccccc;
+        box-shadow: none !important;
+      }
+
+      .mini-card,
+      .skill,
+      .project,
+      .reference,
+      .language {
+        background: #f9f9f9;
+        border: 1px solid #dddddd;
+      }
+
+      .reference { border-left: 3px solid #b07800; }
+      .education { border-left: 3px solid #1565c0; }
+      .phone { color: #b07800; }
+
+      .footer {
+        border: 1px solid #cccccc;
+        background: #f9f9f9 !important;
+        color: #444444;
+      }
+
+      .footer strong { color: #111111; }
+
+      .footer-links a,
+      .footer-links span {
+        background: #f0f0f0;
+        border: 1px solid #dddddd;
+        color: #333333;
+      }
+
+      main { gap: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#contenido">Saltar al contenido</a>
+
+  <nav class="nav" aria-label="Navegación principal">
+    <div class="nav-inner">
+      <a class="brand" href="#top" aria-label="Inicio del CV">
+        <span class="mark" aria-hidden="true">FG</span>
+        <span>Fernando Gamiochipi</span>
+      </a>
+      <div class="nav-links">
+        <a href="#experiencia">Experiencia</a>
+        <a href="#habilidades">Habilidades</a>
+        <a href="#proyectos">Proyectos</a>
+        <a href="#contacto">Contacto</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="wrap" id="top">
+    <header class="hero reveal" aria-labelledby="nombre">
+      <div class="bar" aria-hidden="true">
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="file">perfil-profesional.html</span>
+      </div>
+
+      <div class="hero-body">
+        <div class="intro">
+          <img
+            class="profile-photo"
+            src="foto_perfil.jpg"
+            alt="Foto profesional de Fernando Gamiochipi Orejel"
+            width="124"
+            height="124"
+            loading="eager"
+          >
+          <div>
+            <span class="badge">Disponible para proyectos junior tech</span>
+            <h1 id="nombre">Fernando Gamiochipi Orejel</h1>
+            <p class="subtitle"><strong>Estudiante de Ingeniería en Sistemas</strong> | Automatización con IA | Soporte técnico y desarrollo web</p>
+          </div>
+        </div>
+
+        <div class="side" id="contacto">
+          <ul class="contact" aria-label="Datos de contacto">
+            <li>
+              <a class="pill" href="tel:+525529672982">
+                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="M6.6 10.8c1.5 3 3.7 5.1 6.6 6.6l2.2-2.2c.3-.3.8-.4 1.2-.3 1.3.4 2.6.6 4 .6.7 0 1.2.5 1.2 1.2v3.5c0 .7-.5 1.2-1.2 1.2C10.4 22 2 13.6 2 3.4 2 2.7 2.5 2 3.2 2h3.6C7.5 2 8 2.5 8 3.2c0 1.4.2 2.8.6 4 .1.4 0 .9-.3 1.2l-1.7 2.4Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                <span>55 2967 2982</span>
+              </a>
+            </li>
+            <li>
+              <a class="pill" href="mailto:orejelfernando51@gmail.com">
+                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="M4.5 6.5h15a1.8 1.8 0 0 1 1.8 1.8v7.9a1.8 1.8 0 0 1-1.8 1.8h-15a1.8 1.8 0 0 1-1.8-1.8V8.3a1.8 1.8 0 0 1 1.8-1.8Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path><path d="m3.2 8.2 8.8 5.9 8.8-5.9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                <span>orejelfernando51@gmail.com</span>
+              </a>
+            </li>
+            <li><span class="pill">CDMX, México</span></li>
+            <li><span class="pill">Universidad Anáhuac Norte</span></li>
+          </ul>
+
+          <div class="actions">
+            <a class="btn primary" href="mailto:orejelfernando51@gmail.com">Enviar email</a>
+            <button class="btn" type="button" data-copy-email="orejelfernando51@gmail.com">Copiar email</button>
+            <a class="btn" href="#proyectos">Ver proyectos</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main id="contenido">
+      <section class="window reveal" id="sobre-mi" aria-labelledby="sobre-mi-title">
+        <div class="bar" aria-hidden="true"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="file">sobre-mi.txt</span></div>
+        <div class="body">
+          <div class="heading"><span class="kicker">01 / Perfil</span><span class="rule"></span></div>
+          <h2 id="sobre-mi-title">Sobre mí</h2>
+          <p class="copy">Estudiante de Ingeniería en Sistemas con experiencia práctica real en <strong>automatización con IA, soporte técnico, desarrollo web y videovigilancia IP</strong>. Como cofundador de AOVA, he diseñado y desplegado soluciones digitales para negocios reales: demos interactivas de atención automatizada, flujos CRM y dashboards comerciales. Mi trayectoria como técnico en plataformas Axxon me da una perspectiva técnica combinada — software, hardware y seguridad física. Me comunico con claridad en inglés, aprendo con rapidez y tengo casos de uso concretos que demuestran lo que sé hacer. Busco un equipo donde pueda aportar desde el primer día.</p>
+        </div>
+      </section>
+
+      <section class="window reveal" id="experiencia" aria-labelledby="experiencia-title">
+        <div class="bar" aria-hidden="true"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="file">experiencia-laboral.json</span></div>
+        <div class="body">
+          <div class="heading"><span class="kicker">02 / Trayectoria</span><span class="rule"></span></div>
+          <h2 id="experiencia-title">Experiencia laboral</h2>
+          <div class="timeline">
+            <article class="event">
+              <div class="mini-card">
+                <h3 class="item-title">Cofundador — AOVA (Automatización con IA)</h3>
+                <p class="meta"><span class="period">2025 – Presente</span></p>
+                <ul class="bullets">
+                  <li>Desarrollo de soluciones de automatización empresarial con inteligencia artificial.</li>
+                  <li>Diseño de chatbots y asistentes virtuales para clientes.</li>
+                  <li>Consultoría en transformación digital y optimización de procesos.</li>
+                  <li>Gestión de proyectos de desarrollo de software con metodologías ágiles.</li>
+                </ul>
+              </div>
+            </article>
+            <article class="event">
+              <div class="mini-card">
+                <h3 class="item-title">Técnico en Axxon y Sistemas de Videovigilancia — LTP Global Software</h3>
+                <p class="meta"><span class="period">Sep 2024 – Sep 2025</span></p>
+                <ul class="bullets">
+                  <li>Diseño e implementación de soluciones de seguridad a medida.</li>
+                  <li>Instalación y calibración de cámaras IP y analógicas.</li>
+                  <li>Configuración de plataforma para detección inteligente y resolución de fallas.</li>
+                </ul>
+              </div>
+            </article>
+            <article class="event">
+              <div class="mini-card">
+                <h3 class="item-title">Diseñador — SC Impresiones</h3>
+                <p class="meta"><span class="period">Ene 2024 – Sep 2024</span></p>
+                <ul class="bullets">
+                  <li>Diseño e impresión de lonas y stickers en plotter.</li>
+                  <li>Preparación de archivos vectoriales y calibración de equipos.</li>
+                  <li>Supervisión de calidad para resultados fieles al diseño.</li>
+                </ul>
+              </div>
+            </article>
+            <article class="event">
+              <div class="mini-card">
+                <h3 class="item-title">Instalador — VS Cleaning</h3>
+                <p class="meta"><span class="period">Jul 2021 – Ago 2023</span></p>
+                <ul class="bullets">
+                  <li>Remodelación integral de baños e instalaciones de plomería.</li>
+                  <li>Detección y reparación de fugas con acabados de calidad.</li>
+                </ul>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="window reveal" id="formacion" aria-labelledby="formacion-title">
+        <div class="bar" aria-hidden="true"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="file">formacion-academica.log</span></div>
+        <div class="body">
+          <div class="heading"><span class="kicker">03 / Educación</span><span class="rule"></span></div>
+          <h2 id="formacion-title">Formación académica</h2>
+          <article class="mini-card education">
+            <h3 class="item-title">Ingeniería en Sistemas</h3>
+            <p class="meta">Universidad Anáhuac Norte — <span class="period">Ene 2025 – Presente</span></p>
+          </article>
+        </div>
+      </section>
+
+      <section class="window reveal" id="habilidades" aria-labelledby="habilidades-title">
+        <div class="bar" aria-hidden="true"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="file">habilidades.config</span></div>
+        <div class="body">
+          <div class="heading"><span class="kicker">04 / Stack</span><span class="rule"></span></div>
+          <h2 id="habilidades-title">Habilidades técnicas</h2>
+          <div class="skills">
+            <div class="skill"><div class="skill-top"><span>Python</span><span class="skill-value">85%</span></div><div class="track"><div class="fill" data-width="85"></div></div></div>
+            <div class="skill"><div class="skill-top"><span>JavaScript</span><span class="skill-value">75%</span></div><div class="track"><div class="fill" data-width="75"></div></div></div>
+            <div class="skill"><div class="skill-top"><span>C / C++</span><span class="skill-value">65%</span></div><div class="track"><div class="fill" data-width="65"></div></div></div>
+            <div class="skill"><div class="skill-top"><span>Inteligencia Artificial y Automatización</span><span class="skill-value">80%</span></div><div class="track"><div class="fill" data-width="80"></div></div></div>
+            <div class="skill"><div class="skill-top"><span>Axxon / Videovigilancia</span><span class="skill-value">90%</span></div><div class="track"><div class="fill" data-width="90"></div></div></div>
+            <div class="skill"><div class="skill-top"><span>Cámaras IP / Analógicas</span><span class="skill-value">92%</span></div><div class="track"><div class="fill" data-width="92"></div></div></div>
+            <div class="skill"><div class="skill-top"><span>Redes y Sistemas</span><span class="skill-value">70%</span></div><div class="track"><div class="fill" data-width="70"></div></div></div>
+            <div class="skill"><div class="skill-top"><span>Illustrator</span><span class="skill-value">55%</span></div><div class="track"><div class="fill" data-width="55"></div></div></div>
+            <div class="skill"><div class="skill-top"><span>AutoCAD</span><span class="skill-value">50%</span></div><div class="track"><div class="fill" data-width="50"></div></div></div>
+            <div class="skill"><div class="skill-top"><span>Prompt Engineering y herramientas de IA</span><span class="skill-value">85%</span></div><div class="track"><div class="fill" data-width="85"></div></div></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="window reveal" id="intereses" aria-labelledby="intereses-title">
+        <div class="bar" aria-hidden="true"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="file">areas-de-interes.tags</span></div>
+        <div class="body">
+          <div class="heading"><span class="kicker">05 / Enfoque</span><span class="rule"></span></div>
+          <h2 id="intereses-title">Áreas de interés</h2>
+          <div class="chips">
+            <span class="chip">Inteligencia Artificial</span>
+            <span class="chip">Automatización de Procesos</span>
+            <span class="chip">Desarrollo Web</span>
+            <span class="chip">Videovigilancia IP</span>
+            <span class="chip">Redes &amp; Sistemas</span>
+            <span class="chip">Soporte Técnico</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="window reveal" id="idiomas" aria-labelledby="idiomas-title">
+        <div class="bar" aria-hidden="true"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="file">idiomas.env</span></div>
+        <div class="body">
+          <div class="heading"><span class="kicker">06 / Comunicación</span><span class="rule"></span></div>
+          <h2 id="idiomas-title">Idiomas</h2>
+          <div class="grid">
+            <article class="language"><strong>Español</strong><span class="meta">Nativo</span></article>
+            <article class="language"><strong>Inglés</strong><span class="meta">Avanzado (C1)</span></article>
+          </div>
+        </div>
+      </section>
+
+      <section class="window reveal" id="proyectos" aria-labelledby="proyectos-title">
+        <div class="bar" aria-hidden="true"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="file">proyectos-destacados.html</span></div>
+        <div class="body">
+          <div class="heading"><span class="kicker">07 / Demos</span><span class="rule"></span></div>
+          <h2 id="proyectos-title">Proyectos destacados</h2>
+          <div class="grid">
+            <article class="project">
+              <h3 class="item-title">Integkox — Demo Comercial</h3>
+              <p class="copy">Demo web de una plataforma comercial/interactiva con dashboard, cotizaciones, flujo visual tipo SaaS y experiencia responsive.</p>
+              <ul class="tech"><li>HTML</li><li>CSS</li><li>JavaScript</li><li>Responsive UI</li><li>SaaS Demo</li></ul>
+              <div class="actions"><a class="btn primary" href="./integkox-demo-mejorado.html" target="_blank" rel="noopener noreferrer">Abrir demo</a></div>
+            </article>
+            <article class="project project--pending">
+              <span class="pending-badge">Demo pendiente</span>
+              <h3 class="item-title">Café Aroma × DevWhats — Demo Interactiva</h3>
+              <p class="copy">Demo interactiva tipo WhatsApp/CRM para atención automatizada de cafetería, con simulación de conversaciones, pedidos, membresía y atención al cliente.</p>
+              <ul class="tech"><li>HTML</li><li>CSS</li><li>JavaScript</li><li>CRM Demo</li><li>Automatización</li></ul>
+              <div class="actions"><span class="btn btn--disabled" aria-disabled="true">Demo en preparación</span></div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="window reveal" id="referencias" aria-labelledby="referencias-title">
+        <div class="bar" aria-hidden="true"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="file">referencias.db</span></div>
+        <div class="body">
+          <div class="heading"><span class="kicker">08 / Validación</span><span class="rule"></span></div>
+          <h2 id="referencias-title">Referencias</h2>
+          <div class="grid">
+            <article class="reference">
+              <h3 class="item-title">Perla Vargas Servín</h3>
+              <p class="meta">Directivo, LTP Global Software</p>
+              <a class="phone" href="tel:+525554139231">55 5413 9231</a>
+            </article>
+            <article class="reference">
+              <h3 class="item-title">Jesús Soria Castillo</h3>
+              <p class="meta">Directivo, SC Impresiones</p>
+              <a class="phone" href="tel:+525582321553">55 8232 1553</a>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <strong>Fernando Gamiochipi Orejel</strong>
+      <p>Estudiante de Ingeniería en Sistemas | Automatización con IA | Soporte técnico y desarrollo web</p>
+      <div class="footer-links">
+        <a href="tel:+525529672982">55 2967 2982</a>
+        <a href="mailto:orejelfernando51@gmail.com">orejelfernando51@gmail.com</a>
+        <span>CDMX, México</span>
+      </div>
+    </footer>
+  </div>
+
+  <div class="toast" role="status" aria-live="polite" id="toast">Email copiado al portapapeles</div>
+
+  <script>
+    (function () {
+      var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      var revealItems = document.querySelectorAll(".reveal");
+      var fills = document.querySelectorAll(".fill");
+      var toast = document.getElementById("toast");
+      var toastTimer;
+
+      function showToast(message) {
+        toast.textContent = message;
+        toast.classList.add("show");
+        window.clearTimeout(toastTimer);
+        toastTimer = window.setTimeout(function () {
+          toast.classList.remove("show");
+        }, 2200);
+      }
+
+      if ("IntersectionObserver" in window && !reduceMotion) {
+        var observer = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("visible");
+              entry.target.querySelectorAll(".fill").forEach(function (bar) {
+                bar.style.width = bar.dataset.width + "%";
+              });
+              observer.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.14, rootMargin: "0px 0px -40px 0px" });
+
+        revealItems.forEach(function (item) { observer.observe(item); });
+      } else {
+        revealItems.forEach(function (item) { item.classList.add("visible"); });
+        fills.forEach(function (bar) { bar.style.width = bar.dataset.width + "%"; });
+      }
+
+      document.querySelectorAll("[data-copy-email]").forEach(function (button) {
+        button.addEventListener("click", function () {
+          var email = button.getAttribute("data-copy-email");
+          if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(email).then(function () {
+              showToast("Email copiado al portapapeles");
+            }).catch(function () {
+              window.location.href = "mailto:" + email;
+            });
+            return;
+          }
+          var textarea = document.createElement("textarea");
+          textarea.value = email;
+          textarea.setAttribute("readonly", "");
+          textarea.style.position = "fixed";
+          textarea.style.left = "-9999px";
+          document.body.appendChild(textarea);
+          textarea.select();
+          try {
+            document.execCommand("copy");
+            showToast("Email copiado al portapapeles");
+          } catch (e) {
+            window.location.href = "mailto:" + email;
+          } finally {
+            document.body.removeChild(textarea);
+          }
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

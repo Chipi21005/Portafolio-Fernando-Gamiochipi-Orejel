@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Café Aroma × DevWhats — Demo Interactiva</title>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f2f5; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes pulse3 { 0%,80%,100% { transform: scale(0); opacity: 0.5; } 40% { transform: scale(1); opacity: 1; } }
+    @keyframes toastIn { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes toastOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(100%); } }
+    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+    .msg-anim { animation: fadeIn 0.25s ease; }
+    .conv-anim { animation: slideIn 0.2s ease; }
+    .dot1, .dot2, .dot3 { width: 6px; height: 6px; border-radius: 50%; background: #8696a0; display: inline-block; margin: 0 2px; animation: pulse3 1.4s infinite ease-in-out; }
+    .dot2 { animation-delay: 0.2s; }
+    .dot3 { animation-delay: 0.4s; }
+    .toast-in { animation: toastIn 0.3s ease forwards; }
+    .toast-out { animation: toastOut 0.3s ease forwards; }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+    .wa-bg { background-color: #efeae2; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M0 0h60v60H0z' fill='%23e5ddd5' opacity='0.4'/%3E%3Ccircle cx='30' cy='30' r='1' fill='%23c9bfb5' opacity='0.3'/%3E%3C/svg%3E"); }
+    .iphone-frame { background: #1c1c1e; border-radius: 44px; border: 9px solid #1c1c1e; box-shadow: 0 0 0 1px #3a3a3c, 0 30px 60px rgba(0,0,0,0.5), inset 0 0 0 1px #4a4a4c; }
+    .kpi-card { background: white; border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .scenario-btn { transition: all 0.2s; cursor: pointer; }
+    .scenario-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    .tag-chip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500; }
+    @media (max-width: 768px) {
+      body { overflow-x: hidden; }
+      .client-panel-hide { display: none !important; }
+    }
+    @media (max-width: 480px) {
+      .conv-list-col { width: 100% !important; }
+      .top-filter-btns { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+
+// ─── UTILS ───────────────────────────────────────────────────────────────────
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2);
+const nowTime = () => new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+const avatarColor = (name) => {
+  const colors = ['#6366f1','#8b5cf6','#06b6d4','#10b981','#f59e0b','#ef4444','#ec4899','#14b8a6'];
+  let h = 0; for (let c of (name||'?')) h = (h * 31 + c.charCodeAt(0)) % colors.length;
+  return colors[h];
+};
+const initials = (name) => name?.split(' ').slice(0,2).map(w=>w[0]?.toUpperCase()).join('') || '?';
+
+// ─── DATOS CAFETERÍA ──────────────────────────────────────────────────────────
+const BRAND = { name: 'Café Aroma', emoji: '☕', color: '#6F4E37', light: '#F5E6D3', accent: '#C8976B', green: '#25D366' };
+
+const MENU = {
+  bebidas: [
+    { name: 'Americano', price: 45, desc: 'Espresso doble + agua caliente' },
+    { name: 'Cappuccino', price: 55, desc: 'Espresso + leche vaporizada + espuma' },
+    { name: 'Latte', price: 60, desc: 'Espresso + leche sedosa. Opciones: vainilla, caramelo, avellana' },
+    { name: 'Cold Brew', price: 65, desc: '12h de extracción en frío. Sin lactosa naturalmente' },
+    { name: 'Matcha Latte', price: 70, desc: 'Té matcha ceremonial + leche de avena (sin lactosa)' },
+    { name: 'Smoothie de Mango', price: 65, desc: 'Mango, piña, jengibre. Sin lactosa, sin gluten' },
+  ],
+  alimentos: [
+    { name: 'Croissant de mantequilla', price: 45, desc: 'Recién horneado. Contiene gluten y lácteos' },
+    { name: 'Muffin sin gluten', price: 55, desc: 'Chispas de chocolate. Apto para celíacos' },
+    { name: 'Bowl de frutas', price: 65, desc: 'Fruta de temporada + granola + miel. Sin lactosa' },
+    { name: 'Sandwich de pavo', price: 85, desc: 'Pan integral, pavo, queso, aguacate, tomate' },
+    { name: 'Tostadas de aguacate', price: 75, desc: 'Pan de masa madre + guacamole + chile. Vegano' },
+  ]
+};
+
+const SUCURSALES = [
+  { id: 'polanco', name: 'Polanco', hours: '7am – 9pm', addr: 'Av. Presidente Masaryk 123' },
+  { id: 'roma', name: 'Roma Norte', hours: '7am – 10pm', addr: 'Álvaro Obregón 45' },
+  { id: 'condesa', name: 'Condesa', hours: '8am – 9pm', addr: 'Tamaulipas 67' },
+];
+
+const MEMBRESIA = {
+  puntos_por_peso: 1,
+  puntos_cafe: 10,
+  puntos_recompensa: 150,
+  recompensa: 'café gratis',
+  tiers: ['Bronce (0-499 pts)', 'Plata (500-999 pts)', 'Oro (1000+ pts)'],
+};
+
+// ─── RESPUESTAS BOT ───────────────────────────────────────────────────────────
+const BOT_RESPONSES = {
+  greeting: (name) => `¡Hola${name ? ' ' + name.split(' ')[0] : ''}! Bienvenido a *Café Aroma*\n\n¿En qué te puedo ayudar hoy?\n\n1. Ver menú\n2. Hacer un pedido\n3. Reservar mesa\n4. Membresía y puntos\n5. Horarios y sucursales\n6. Hablar con un agente`,
+
+  menu: () => `Aquí nuestro menú:\n\n*BEBIDAS:*\n• Americano — $45\n• Cappuccino — $55\n• Latte — $60\n• Cold Brew — $65\n• Matcha Latte (sin lactosa) — $70\n• Smoothie de Mango — $65\n\n*ALIMENTOS:*\n• Croissant de mantequilla — $45\n• Muffin sin gluten — $55\n• Bowl de frutas — $65\n• Sandwich de pavo — $85\n• Tostadas de aguacate — $75\n\n¿Te gustaría hacer un pedido?`,
+
+  sin_lactosa: () => `¡Claro! Tenemos varias opciones *sin lactosa*:\n\n*Bebidas:*\n• Cold Brew — $65 (sin lactosa por naturaleza)\n• Matcha Latte con leche de avena — $70\n• Smoothie de Mango — $65\n• Americano — $45\n\n*Alimentos:*\n• Bowl de frutas con granola — $65\n• Tostadas de aguacate — $75 (vegano)\n\n_Nota: Latte y Cappuccino también pueden prepararse con leche de avena, almendra o coco sin costo extra_\n\n¿Te gustaría ordenar alguno?`,
+
+  pedido_confirmar: (items) => `¡Perfecto! Déjame confirmar tu pedido:\n\n${items}\n\n¿Todo correcto? Responde *SÍ* para confirmar y te doy el tiempo estimado.`,
+
+  pedido_ok: (total, mins, suc) => `*¡Pedido confirmado!*\n\nTotal: *$${total} MXN*\nSucursal: ${suc}\nTiempo estimado: *${mins} minutos*\n\nTe avisaremos cuando esté listo.\n\n_Pago en caja o con QR al recoger_`,
+
+  reservacion: () => `¡Con gusto te hacemos la reservación!\n\nNecesito estos datos:\n\n1. ¿Qué fecha?\n2. ¿A qué hora?\n3. ¿Cuántas personas?\n4. ¿Qué sucursal? (Polanco / Roma Norte / Condesa)\n5. ¿Es para alguna celebración especial?`,
+
+  reservacion_cumpleanos: (nombre) => `¡Qué emocionante! Nos encantaría celebrar con ${nombre || 'ustedes'}.\n\nPara reservaciones de cumpleaños tenemos:\n• Decoración sin costo\n• Pastelillo de cortesía para el festejado\n• Área instagrameable disponible\n\nDisponibilidad:\n• Fines de semana (solo con reservación)\n• Mín. 4 personas, máx. 20\n\n¿En cuál sucursal y para cuándo?`,
+
+  reservacion_ok: (fecha, hora, personas, suc) => `*¡Reservación confirmada!*\n\nFecha: *${fecha}*\nHora: *${hora}*\nPersonas: *${personas}*\nSucursal: *${suc}*\n\nTe esperamos. Favor de llegar 5 min antes.\n_Cancelaciones con 2h de anticipación_`,
+
+  membresia: (pts, nombre) => `Hola${nombre ? ' ' + nombre.split(' ')[0] : ''}!\n\n*Tus puntos Aroma:* ${pts} pts\n\n*Tu nivel:* ${pts >= 1000 ? 'Oro' : pts >= 500 ? 'Plata' : 'Bronce'}\n${pts >= 1000 ? '¡Felicidades! Tienes acceso a beneficios exclusivos.' : `Te faltan *${pts >= 500 ? 1000 - pts : 500 - pts} pts* para el siguiente nivel.`}\n\n*Cómo ganar puntos:*\n• 1 pto por cada $1 gastado\n• 10 pts extra por cada café\n• 150 pts = 1 café gratis\n\n¿Quieres canjear alguna recompensa?`,
+
+  queja: () => `Lamentamos mucho lo sucedido.\n\nTu experiencia es nuestra prioridad. Voy a transferirte con uno de nuestros agentes ahora mismo para resolver esto de la mejor manera.\n\n_Tiempo de espera estimado: menos de 2 minutos_`,
+
+  horarios: () => `Aquí nuestros horarios:\n\n*Polanco* (Masaryk 123)\nLun-Vie: 7am – 9pm | Sáb-Dom: 8am – 9pm\n\n*Roma Norte* (Álvaro Obregón 45)\nLun-Dom: 7am – 10pm\n\n*Condesa* (Tamaulipas 67)\nLun-Vie: 8am – 9pm | Sáb: 8am – 10pm | Dom: 9am – 8pm\n\n¿Te puedo ayudar en algo más?`,
+
+  default: () => `¡Gracias por escribirnos!\n\nPuedo ayudarte con:\n\n1. Ver menú\n2. Hacer un pedido para recoger\n3. Reservar mesa\n4. Ver tus puntos y membresía\n5. Horarios y sucursales\n6. Hablar con un agente\n\n¿Con qué te ayudo?`,
+};
+
+const detectIntent = (text) => {
+  const t = text.toLowerCase();
+  if (/hola|buenas|hey|buen d|buen t|buen n/.test(t)) return 'greeting';
+  if (/sin lactosa|lactosa|intolerante|vegano|sin gl[uú]ten|celiaco|alergi/.test(t)) return 'sin_lactosa';
+  if (/men[uú]|carta|qu[eé] tienen|qu[eé] hay|opciones|precios/.test(t)) return 'menu';
+  if (/queja|mal|p[eé]simo|decepcionado|problema|fr[ií]o|tarde|equivocad|reclamo/.test(t)) return 'queja';
+  if (/cumplea[ñn]|festejo|celebraci[oó]n|aniversario/.test(t)) return 'reservacion_cumpleanos';
+  if (/reserva|mesa|espacio|sentar/.test(t)) return 'reservacion';
+  if (/pedido|orden|quiero|pedir|llevar|recoger/.test(t)) return 'pedido';
+  if (/punto|membresia|membres[ií]a|lealtad|recompensa|saldo|nivel/.test(t)) return 'membresia';
+  if (/horario|abierto|abren|cierran|horas/.test(t)) return 'horarios';
+  if (/agente|persona|humano|hablar con|ayuda real/.test(t)) return 'agente';
+  return 'default';
+};
+
+const getBotResponse = (intent, conv) => {
+  const name = conv.contact.name;
+  const pts = conv.contact.points || 0;
+  switch (intent) {
+    case 'greeting': return BOT_RESPONSES.greeting(name);
+    case 'menu': return BOT_RESPONSES.menu();
+    case 'sin_lactosa': return BOT_RESPONSES.sin_lactosa();
+    case 'queja': return BOT_RESPONSES.queja();
+    case 'reservacion': return BOT_RESPONSES.reservacion();
+    case 'reservacion_cumpleanos': return BOT_RESPONSES.reservacion_cumpleanos(name);
+    case 'pedido': return BOT_RESPONSES.pedido_confirmar('• 1x Latte de vainilla — $60\n• 1x Tostadas de aguacate — $75');
+    case 'membresia': return BOT_RESPONSES.membresia(pts, name);
+    case 'horarios': return BOT_RESPONSES.horarios();
+    case 'agente': return 'Te estoy transfiriendo con un agente. Un momento por favor...';
+    default: return BOT_RESPONSES.default();
+  }
+};
+
+// ─── CONVERSACIONES INICIALES ─────────────────────────────────────────────────
+const INITIAL_CONVS = [
+  {
+    id: 'c1', mode: 'bot', unread: 0,
+    contact: { name: 'Sofía Ramírez', phone: '+52 55 1234 5678', points: 320, tags: ['#cliente-frecuente','#sin-lactosa'], since: 'Mar 2024' },
+    lastMsg: '¿Tienen opciones sin lactosa?', lastTime: '10:24',
+    history: [{ id:'m1', type:'incoming', note:'Ayer 09:15', text:'Buenos días! ¿Me pueden decir sus opciones sin lactosa? 🙏', time:'09:15', system: true }],
+    messages: [
+      { id:'m2', from:'client', text:'Buenos días! ¿Me pueden decir sus opciones sin lactosa? 🙏', time:'10:20' },
+      { id:'m3', from:'bot', text: BOT_RESPONSES.sin_lactosa(), time:'10:20' },
+      { id:'m4', from:'client', text:'Perfecto! Quiero 2 Matcha Latte con leche de avena y 2 bowls de frutas para recoger en Polanco', time:'10:22' },
+      { id:'m5', from:'bot', text: BOT_RESPONSES.pedido_confirmar('• 2x Matcha Latte (leche de avena) — $140\n• 2x Bowl de frutas — $130\n\n*Total: $270 MXN*'), time:'10:22' },
+      { id:'m6', from:'client', text:'Sí, perfecto!', time:'10:24' },
+      { id:'m7', from:'bot', text: BOT_RESPONSES.pedido_ok(270, 12, 'Polanco'), time:'10:24' },
+    ]
+  },
+  {
+    id: 'c2', mode: 'agent', unread: 0,
+    contact: { name: 'Carlos Mendoza', phone: '+52 55 9876 5432', points: 85, tags: ['#queja','#seguimiento'], since: 'Ene 2025', agent: 'Ana García' },
+    lastMsg: 'Entiendo. Vamos a solucionarlo.', lastTime: '10:15',
+    history: [],
+    messages: [
+      { id:'m1', from:'client', text:'Buenos días, tuve un problema ayer en su sucursal de Roma. Mi café llegó completamente frío y el personal fue poco amable 😤', time:'09:50' },
+      { id:'m2', from:'bot', text: BOT_RESPONSES.queja(), time:'09:51' },
+      { id:'m3', from:'system', text:'Ana García tomó el control de la conversación', time:'09:52' },
+      { id:'m4', from:'agent', text:'Hola Carlos, soy Ana del equipo de atención. Lamento mucho lo que pasó. Cuéntame más detalles para poder ayudarte correctamente.', time:'09:53' },
+      { id:'m5', from:'client', text:'Ordené un americano y llegó a temperatura ambiente. Además la persona en caja fue muy seca.', time:'09:55' },
+      { id:'m6', from:'agent', text:'Carlos, tienes toda la razón. Eso no refleja nuestros estándares. ¿Puedo ofrecerte una compensación? Podemos enviarte un voucher de $100 para tu próxima visita.', time:'09:57' },
+      { id:'m7', from:'client', text:'Está bien, lo acepto. Gracias por atenderme rápido.', time:'10:00' },
+      { id:'m8', from:'agent', text:'Entiendo. Vamos a solucionarlo.', time:'10:15' },
+    ]
+  },
+  {
+    id: 'c3', mode: 'bot', unread: 0,
+    contact: { name: 'Valentina Torres', phone: '+52 55 5555 1111', points: 1240, tags: ['#membresia-oro','#eventos'], since: 'Sep 2023' },
+    lastMsg: 'Reservación confirmada ✅', lastTime: '09:45',
+    history: [],
+    messages: [
+      { id:'m1', from:'client', text:'Hola! Quiero reservar para el cumpleaños de mi hija este sábado 🎂', time:'09:30' },
+      { id:'m2', from:'bot', text: BOT_RESPONSES.reservacion_cumpleanos('Valentina'), time:'09:30' },
+      { id:'m3', from:'client', text:'En Condesa, somos 8 personas, el sábado a las 4pm', time:'09:32' },
+      { id:'m4', from:'bot', text: BOT_RESPONSES.reservacion_ok('Sábado 12 de abril', '4:00 PM', '8 personas', 'Condesa'), time:'09:32' },
+      { id:'m5', from:'client', text:'¡Muchas gracias! ¿Pueden poner decoración rosa?', time:'09:40' },
+      { id:'m6', from:'bot', text:'¡Claro que sí! Anotamos decoración *rosa* para el área. El equipo de Condesa estará listo para recibirlos. ¿Hay alguna alergia o restricción alimentaria que deba considerar?', time:'09:40' },
+      { id:'m7', from:'client', text:'No, todo está bien. Muchas gracias!', time:'09:44' },
+      { id:'m8', from:'bot', text:'¡Con gusto! ¡Los esperamos el sábado!', time:'09:45' },
+      { id:'m9', from:'system', text:'Reservación confirmada ✅', time:'09:45' },
+    ]
+  },
+  {
+    id: 'c4', mode: 'bot', unread: 0,
+    contact: { name: 'Diego Herrera', phone: '+52 55 3333 7777', points: 580, tags: ['#membresia-plata','#cliente-frecuente'], since: 'Jun 2024' },
+    lastMsg: '¿Cuántos puntos me faltan?', lastTime: '10:05',
+    history: [],
+    messages: [
+      { id:'m1', from:'client', text:'Hola, quiero saber cuántos puntos tengo', time:'10:00' },
+      { id:'m2', from:'bot', text: BOT_RESPONSES.membresia(580, 'Diego Herrera'), time:'10:00' },
+      { id:'m3', from:'client', text:'¿Cuántos puntos me faltan para el siguiente nivel?', time:'10:05' },
+      { id:'m4', from:'bot', text:'¡Solo te faltan *420 puntos* para nivel Oro!\n\nEn tu próxima visita si gastas $420 llegas directo. O si además pides café, ganas 10 pts extra por cada uno.\n\n¿Quieres hacer un pedido hoy?', time:'10:05' },
+    ]
+  },
+  {
+    id: 'c5', mode: 'pending', unread: 3,
+    contact: { name: 'Mariana López', phone: '+52 55 8888 2222', points: 0, tags: ['#nuevo-cliente'], since: 'Hoy' },
+    lastMsg: '¿Tienen WiFi? Busco un lugar para trabajar', lastTime: 'Ahora',
+    history: [],
+    messages: [
+      { id:'m1', from:'client', text:'Hola, ¿tienen WiFi disponible?', time:'10:28' },
+      { id:'m2', from:'client', text:'Busco un lugar tranquilo para trabajar unas horas', time:'10:28' },
+      { id:'m3', from:'client', text:'¿Tienen enchufes?', time:'10:29' },
+    ]
+  }
+];
+
+// ─── AUTO-MENSAJES ─────────────────────────────────────────────────────────────
+const AUTO_MSGS = [
+  { convId: 'c1', text: 'Oye, ¿tienen descuento para llevar varios cafés? pregunto para mi oficina 😊', delay: 7000 },
+  { convId: 'c5', text: '¿Tienen mesas grandes? somos 3 personas con laptops', delay: 27000 },
+  { convId: 'c4', text: 'Ah, entiendo. ¿Hay alguna promo del mes para acumular más rápido?', delay: 47000 },
+  { convId: 'c3', text: 'Perfecto! Una última cosa, ¿hay estacionamiento cerca de Condesa?', delay: 67000 },
+  { convId: 'c1', text: '¿Aceptan pago con tarjeta? o solo efectivo', delay: 87000 },
+  { convId: 'c5', text: 'También, ¿cuánto cuesta el café del día?', delay: 107000 },
+  { convId: 'c2', text: 'Muchas gracias Ana, la atención fue excelente 🙏', delay: 127000 },
+  { convId: 'c4', text: '¿Hay alguna app de Café Aroma para acumular puntos?', delay: 147000 },
+];
+
+// ─── KPI DATA ─────────────────────────────────────────────────────────────────
+const KPI_INIT = {
+  totalToday: 47,
+  botResolved: 38,
+  avgReply: '1.2 min',
+  satisfaction: '94%',
+  reservas: 6,
+  pedidos: 23,
+};
+
+// ─── COMPONENTS ───────────────────────────────────────────────────────────────
+
+function Avatar({ name, size = 'md', online = false }) {
+  const sz = size === 'sm' ? 32 : size === 'lg' ? 48 : 40;
+  const fs = size === 'sm' ? 12 : size === 'lg' ? 18 : 14;
+  return (
+    <div style={{ position: 'relative', flexShrink: 0 }}>
+      <div style={{ width: sz, height: sz, borderRadius: '50%', background: avatarColor(name), display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: fs, fontWeight: 700 }}>
+        {initials(name)}
+      </div>
+      {online && <div style={{ position: 'absolute', bottom: 1, right: 1, width: 10, height: 10, borderRadius: '50%', background: '#25d366', border: '2px solid white' }} />}
+    </div>
+  );
+}
+
+function StatusBadge({ mode }) {
+  const cfg = {
+    bot: { label: 'Bot', bg: '#e0f2fe', color: '#0369a1' },
+    agent: { label: 'Agente', bg: '#dcfce7', color: '#15803d' },
+    pending: { label: 'Pendiente', bg: '#fef3c7', color: '#92400e' },
+  };
+  const c = cfg[mode] || cfg.bot;
+  return <span style={{ background: c.bg, color: c.color, borderRadius: 12, padding: '2px 8px', fontSize: 11, fontWeight: 600 }}>{c.label}</span>;
+}
+
+function WaText({ text }) {
+  if (!text) return null;
+  const parts = text.split(/(\*[^*]+\*)/g);
+  return (
+    <span style={{ whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>
+      {parts.map((p, i) =>
+        p.startsWith('*') && p.endsWith('*')
+          ? <strong key={i}>{p.slice(1, -1)}</strong>
+          : p
+      )}
+    </span>
+  );
+}
+
+function Typing() {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 2, padding: '8px 12px', background: 'white', borderRadius: '8px 18px 18px 0', boxShadow: '0 1px 2px rgba(0,0,0,0.1)', width: 'fit-content' }}>
+      <span className="dot1" /><span className="dot2" /><span className="dot3" />
+    </div>
+  );
+}
+
+function MsgBubble({ msg }) {
+  if (msg.from === 'system') {
+    return (
+      <div style={{ textAlign: 'center', margin: '8px 0' }}>
+        <span style={{ background: 'rgba(255,255,255,0.8)', color: '#667781', fontSize: 11, padding: '4px 12px', borderRadius: 8 }}>{msg.text}</span>
+      </div>
+    );
+  }
+  const isOut = msg.from !== 'client';
+  const bg = isOut ? '#d9fdd3' : 'white';
+  return (
+    <div className="msg-anim" style={{ display: 'flex', justifyContent: isOut ? 'flex-end' : 'flex-start', marginBottom: 4 }}>
+      <div style={{ maxWidth: '72%', background: bg, borderRadius: isOut ? '18px 8px 18px 18px' : '8px 18px 18px 18px', padding: '8px 12px', boxShadow: '0 1px 2px rgba(0,0,0,0.08)', position: 'relative' }}>
+        {isOut && msg.from === 'agent' && <div style={{ fontSize: 10, color: '#6F4E37', fontWeight: 600, marginBottom: 2 }}>Agente</div>}
+        {isOut && msg.from === 'bot' && <div style={{ fontSize: 10, color: '#0369a1', fontWeight: 600, marginBottom: 2 }}>Aroma Bot</div>}
+        <WaText text={msg.text} />
+        <div style={{ fontSize: 10, color: '#8696a0', textAlign: 'right', marginTop: 4 }}>{msg.time}{isOut && ' ✓✓'}</div>
+      </div>
+    </div>
+  );
+}
+
+function ConvItem({ conv, selected, onClick }) {
+  const isUnread = conv.unread > 0;
+  return (
+    <div className="conv-anim" onClick={onClick} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', background: selected ? '#f0f2f5' : 'white', cursor: 'pointer', borderBottom: '1px solid #f0f2f5', transition: 'background 0.15s' }}
+      onMouseEnter={e => !selected && (e.currentTarget.style.background = '#f9fafb')}
+      onMouseLeave={e => !selected && (e.currentTarget.style.background = 'white')}>
+      <Avatar name={conv.contact.name} size="md" online={conv.mode === 'agent'} />
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ fontWeight: isUnread ? 700 : 500, fontSize: 14, color: '#111b21', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 130 }}>{conv.contact.name}</span>
+          <span style={{ fontSize: 11, color: isUnread ? BRAND.color : '#8696a0', fontWeight: isUnread ? 700 : 400, flexShrink: 0 }}>{conv.lastTime}</span>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 2 }}>
+          <span style={{ fontSize: 12, color: '#667781', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 150 }}>{conv.lastMsg}</span>
+          <div style={{ display: 'flex', gap: 4, alignItems: 'center', flexShrink: 0 }}>
+            <StatusBadge mode={conv.mode} />
+            {isUnread > 0 && <div style={{ background: BRAND.color, color: 'white', borderRadius: '50%', minWidth: 18, height: 18, fontSize: 11, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' }}>{conv.unread}</div>}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Toast({ toasts, onDismiss }) {
+  return (
+    <div style={{ position: 'fixed', bottom: 80, right: 20, zIndex: 9999, display: 'flex', flexDirection: 'column', gap: 8 }}>
+      {toasts.map(t => (
+        <div key={t.id} className={t.out ? 'toast-out' : 'toast-in'} onClick={() => onDismiss(t.id)}
+          style={{ background: 'white', borderRadius: 12, padding: '10px 14px', boxShadow: '0 4px 20px rgba(0,0,0,0.15)', display: 'flex', alignItems: 'center', gap: 10, maxWidth: 300, cursor: 'pointer', borderLeft: `4px solid ${BRAND.color}` }}>
+          <Avatar name={t.name} size="sm" />
+          <div>
+            <div style={{ fontWeight: 600, fontSize: 13 }}>{t.name}</div>
+            <div style={{ fontSize: 12, color: '#667781', marginTop: 1 }}>{t.text.slice(0, 50)}{t.text.length > 50 ? '...' : ''}</div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function KpiBar({ kpi, show, onToggle }) {
+  if (!show) return (
+    <div onClick={onToggle} style={{ background: 'white', borderBottom: '1px solid #e9ecef', padding: '6px 16px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: '#6F4E37', fontWeight: 600 }}>
+      Ver métricas del día ▼
+    </div>
+  );
+  return (
+    <div style={{ background: 'white', borderBottom: '1px solid #e9ecef', padding: '10px 16px' }}>
+      <div onClick={onToggle} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+        <span style={{ fontSize: 12, fontWeight: 700, color: '#374151' }}>Métricas en tiempo real — hoy</span>
+        <span style={{ fontSize: 11, color: '#9ca3af' }}>▲ cerrar</span>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+        {[
+          { label: 'Conversaciones', val: kpi.totalToday, color: '#6366f1' },
+          { label: 'Resueltas por bot', val: `${kpi.botResolved} (${Math.round(kpi.botResolved/kpi.totalToday*100)}%)`, color: '#0ea5e9' },
+          { label: 'Respuesta prom.', val: kpi.avgReply, color: '#10b981' },
+          { label: 'Satisfacción', val: kpi.satisfaction, color: '#f59e0b' },
+          { label: 'Reservas hoy', val: kpi.reservas, color: '#8b5cf6' },
+          { label: 'Pedidos hoy', val: kpi.pedidos, color: '#ef4444' },
+        ].map(k => (
+          <div key={k.label} style={{ background: '#f9fafb', borderRadius: 8, padding: '8px 10px', borderLeft: `3px solid ${k.color}` }}>
+            <div style={{ fontSize: 16, fontWeight: 700, color: k.color }}>{k.val}</div>
+            <div style={{ fontSize: 10, color: '#6b7280', marginTop: 1 }}>{k.label}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ScenarioPanel({ onActivate }) {
+  const scenarios = [
+    { id: 's1', label: 'Sin lactosa', desc: 'Cliente pregunta por menú sin lactosa', color: '#10b981' },
+    { id: 's2', label: 'Pedido pickup', desc: 'Cliente hace pedido para recoger', color: '#6366f1' },
+    { id: 's3', label: 'Reserva cumple', desc: 'Reservación de cumpleaños', color: '#8b5cf6' },
+    { id: 's4', label: 'Membresía', desc: 'Consulta de puntos y nivel', color: '#f59e0b' },
+    { id: 's5', label: 'Escalación', desc: 'Queja → agente humano', color: '#ef4444' },
+  ];
+  return (
+    <div style={{ background: '#f9fafb', borderTop: '1px solid #e9ecef', padding: '10px 12px' }}>
+      <div style={{ fontSize: 11, color: '#9ca3af', fontWeight: 600, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Activar escenario</div>
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+        {scenarios.map(s => (
+          <button key={s.id} className="scenario-btn" onClick={() => onActivate(s)} title={s.desc}
+            style={{ background: s.color, color: 'white', border: 'none', borderRadius: 8, padding: '5px 10px', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
+            {s.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ClientPanel({ conv, onAddTag, onUpdateNote, onClose }) {
+  const [newTag, setNewTag] = useState('');
+  const [note, setNote] = useState(conv?.notes || '');
+  const [editNote, setEditNote] = useState(false);
+  useEffect(() => { setNote(conv?.notes || ''); setEditNote(false); }, [conv?.id]);
+  if (!conv) return (
+    <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af', fontSize: 14 }}>
+      Selecciona una conversación
+    </div>
+  );
+  const c = conv.contact;
+  const histItems = [
+    { label: 'Pedido', desc: '2x Matcha Latte + Bowl', val: '$270', date: 'Ayer' },
+    { label: 'Reserva', desc: 'Mesa 2 personas', val: 'Cumplida', date: 'Hace 5 días' },
+    { label: 'Pedido', desc: '1x Americano + Croissant', val: '$90', date: 'Hace 1 semana' },
+  ];
+  return (
+    <div style={{ width: 280, background: 'white', borderLeft: '1px solid #e9ecef', display: 'flex', flexDirection: 'column', overflowY: 'auto', flexShrink: 0 }}>
+      {/* Header */}
+      <div style={{ padding: '14px 16px', borderBottom: '1px solid #f0f2f5', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: BRAND.light }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <Avatar name={c.name} size="md" />
+          <div>
+            <div style={{ fontWeight: 700, fontSize: 14 }}>{c.name}</div>
+            <div style={{ fontSize: 11, color: '#667781' }}>{c.phone}</div>
+          </div>
+        </div>
+        <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 18, color: '#9ca3af' }}>×</button>
+      </div>
+      {/* Info */}
+      <div style={{ padding: '12px 16px', borderBottom: '1px solid #f0f2f5' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+          <span style={{ fontSize: 12, color: '#667781' }}>Puntos Aroma</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: BRAND.color }}>{c.points || 0} pts</span>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+          <span style={{ fontSize: 12, color: '#667781' }}>Cliente desde</span>
+          <span style={{ fontSize: 12, fontWeight: 500 }}>{c.since}</span>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <span style={{ fontSize: 12, color: '#667781' }}>Nivel</span>
+          <span style={{ fontSize: 12, fontWeight: 600, color: c.points >= 1000 ? '#b45309' : c.points >= 500 ? '#6b7280' : '#b45309' }}>
+            {c.points >= 1000 ? 'Oro' : c.points >= 500 ? 'Plata' : 'Bronce'}
+          </span>
+        </div>
+      </div>
+      {/* Tags */}
+      <div style={{ padding: '12px 16px', borderBottom: '1px solid #f0f2f5' }}>
+        <div style={{ fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 8 }}>Etiquetas</div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 8 }}>
+          {(c.tags || []).map(tag => (
+            <span key={tag} className="tag-chip" style={{ background: BRAND.light, color: BRAND.color }}>{tag}</span>
+          ))}
+        </div>
+        <div style={{ display: 'flex', gap: 4 }}>
+          <input value={newTag} onChange={e => setNewTag(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && newTag.trim()) { onAddTag(conv.id, '#' + newTag.trim().replace(/^#/, '')); setNewTag(''); }}}
+            placeholder="+ nuevo tag" style={{ flex: 1, border: '1px solid #e5e7eb', borderRadius: 6, padding: '4px 8px', fontSize: 12, outline: 'none' }} />
+          <button onClick={() => { if (newTag.trim()) { onAddTag(conv.id, '#' + newTag.trim().replace(/^#/, '')); setNewTag(''); }}}
+            style={{ background: BRAND.color, color: 'white', border: 'none', borderRadius: 6, padding: '4px 8px', fontSize: 12, cursor: 'pointer' }}>+</button>
+        </div>
+      </div>
+      {/* Notas */}
+      <div style={{ padding: '12px 16px', borderBottom: '1px solid #f0f2f5' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+          <span style={{ fontSize: 12, fontWeight: 600, color: '#374151' }}>Notas internas</span>
+          <button onClick={() => { if (editNote) onUpdateNote(conv.id, note); setEditNote(!editNote); }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 11, color: editNote ? '#10b981' : '#6b7280', fontWeight: 600 }}>
+            {editNote ? '✓ Guardar' : '✏️ Editar'}
+          </button>
+        </div>
+        {editNote
+          ? <textarea value={note} onChange={e => setNote(e.target.value)} rows={3}
+              style={{ width: '100%', border: '1px solid #6F4E37', borderRadius: 6, padding: '6px 8px', fontSize: 12, resize: 'none', outline: 'none', fontFamily: 'inherit' }} />
+          : <div style={{ fontSize: 12, color: note ? '#374151' : '#9ca3af', background: '#f9fafb', borderRadius: 6, padding: '6px 8px', minHeight: 48 }}>
+              {note || 'Sin notas. Haz clic en Editar para agregar.'}
+            </div>
+        }
+      </div>
+      {/* Historial */}
+      <div style={{ padding: '12px 16px' }}>
+        <div style={{ fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 8 }}>Historial reciente</div>
+        {histItems.map((h, i) => (
+          <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8, paddingBottom: 8, borderBottom: i < histItems.length - 1 ? '1px solid #f0f2f5' : 'none' }}>
+            <div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: '#374151' }}>{h.label}</div>
+              <div style={{ fontSize: 11, color: '#6b7280' }}>{h.desc}</div>
+              <div style={{ fontSize: 10, color: '#9ca3af', marginTop: 2 }}>{h.date}</div>
+            </div>
+            <span style={{ fontSize: 12, fontWeight: 600, color: BRAND.color }}>{h.val}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ChatPanel({ conv, onSend, onTakeControl, onReturnBot, showProfile, onToggleProfile, onExport }) {
+  const [input, setInput] = useState('');
+  const [typing, setTyping] = useState(false);
+  const messagesEndRef = useRef(null);
+  useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [conv?.messages]);
+
+  if (!conv) return (
+    <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f0f2f5' }}>
+      <div style={{ textAlign: 'center', color: '#9ca3af' }}>
+        <div style={{ fontSize: 16, fontWeight: 500 }}>Selecciona una conversación</div>
+      </div>
+    </div>
+  );
+
+  const send = () => {
+    if (!input.trim() || conv.mode === 'bot') return;
+    onSend(conv.id, input.trim(), 'agent');
+    setInput('');
+  };
+
+  return (
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+      {/* Chat header */}
+      <div style={{ padding: '10px 16px', background: 'white', borderBottom: '1px solid #e9ecef', display: 'flex', alignItems: 'center', gap: 10 }}>
+        <Avatar name={conv.contact.name} online={conv.mode === 'agent'} />
+        <div style={{ flex: 1 }}>
+          <div style={{ fontWeight: 600, fontSize: 14 }}>{conv.contact.name}</div>
+          <div style={{ fontSize: 12, color: '#667781', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <StatusBadge mode={conv.mode} />
+            {conv.mode === 'agent' && conv.contact.agent && <span>→ {conv.contact.agent}</span>}
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <button onClick={onExport} title="Exportar conversación" style={{ background: '#f0f2f5', border: 'none', borderRadius: 8, padding: '6px 10px', cursor: 'pointer', fontSize: 13 }}>Exportar</button>
+          <button onClick={onToggleProfile} title="Ver perfil" style={{ background: showProfile ? BRAND.light : '#f0f2f5', border: 'none', borderRadius: 8, padding: '6px 10px', cursor: 'pointer', fontSize: 13, color: showProfile ? BRAND.color : '#374151', fontWeight: showProfile ? 700 : 400 }}>Perfil</button>
+        </div>
+      </div>
+
+      {/* Mode banner */}
+      <div style={{ padding: '8px 16px', background: conv.mode === 'agent' ? '#f0fdf4' : conv.mode === 'pending' ? '#fffbeb' : '#eff6ff', borderBottom: '1px solid #e9ecef', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span style={{ fontSize: 12, color: conv.mode === 'agent' ? '#15803d' : conv.mode === 'pending' ? '#92400e' : '#1d4ed8', fontWeight: 600 }}>
+          {conv.mode === 'bot' && 'Bot respondiendo automáticamente'}
+          {conv.mode === 'agent' && 'Agente en control — puedes responder'}
+          {conv.mode === 'pending' && 'Sin responder — cliente esperando'}
+        </span>
+        <div style={{ display: 'flex', gap: 6 }}>
+          {(conv.mode === 'bot' || conv.mode === 'pending') && (
+            <button onClick={() => onTakeControl(conv.id)} style={{ background: '#15803d', color: 'white', border: 'none', borderRadius: 6, padding: '4px 10px', fontSize: 11, fontWeight: 600, cursor: 'pointer' }}>Tomar control</button>
+          )}
+          {conv.mode === 'agent' && (
+            <button onClick={() => onReturnBot(conv.id)} style={{ background: '#1d4ed8', color: 'white', border: 'none', borderRadius: 6, padding: '4px 10px', fontSize: 11, fontWeight: 600, cursor: 'pointer' }}>Devolver al bot</button>
+          )}
+        </div>
+      </div>
+
+      {/* Messages */}
+      <div className="wa-bg" style={{ flex: 1, overflowY: 'auto', padding: '12px 16px', display: 'flex', flexDirection: 'column' }}>
+        {conv.messages.map(msg => <MsgBubble key={msg.id} msg={msg} />)}
+        {typing && <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 4 }}><Typing /></div>}
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Input */}
+      <div style={{ padding: '8px 12px', background: 'white', borderTop: '1px solid #e9ecef', display: 'flex', gap: 8, alignItems: 'flex-end' }}>
+        {conv.mode === 'bot' && (
+          <div style={{ flex: 1, background: '#f0f2f5', borderRadius: 24, padding: '10px 16px', fontSize: 13, color: '#9ca3af', display: 'flex', alignItems: 'center', gap: 6 }}>
+            El bot está manejando esta conversación. Haz clic en "Tomar control" para responder.
+          </div>
+        )}
+        {conv.mode !== 'bot' && (
+          <>
+            <textarea
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
+              placeholder="Escribe un mensaje..."
+              rows={1}
+              style={{ flex: 1, border: '1px solid #e5e7eb', borderRadius: 24, padding: '10px 16px', fontSize: 13, resize: 'none', outline: 'none', fontFamily: 'inherit', maxHeight: 100, overflow: 'auto' }}
+            />
+            <button onClick={send} style={{ background: BRAND.color, color: 'white', border: 'none', borderRadius: '50%', width: 40, height: 40, fontSize: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>➤</button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function PhoneSimulator({ convs, onReceive, onClose }) {
+  const [selId, setSelId] = useState(convs[0]?.id || '');
+  const [msg, setMsg] = useState('');
+  const [flash, setFlash] = useState(false);
+  const selConv = convs.find(c => c.id === selId);
+
+  const send = () => {
+    if (!msg.trim() || !selId) return;
+    onReceive(selId, msg.trim());
+    setMsg('');
+    setFlash(true);
+    setTimeout(() => setFlash(false), 800);
+  };
+
+  useEffect(() => {
+    const handler = (e) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [onClose]);
+
+  return (
+    <div onClick={e => e.target === e.currentTarget && onClose()} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)' }}>
+      <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
+        {/* iPhone frame */}
+        <div className="iphone-frame" style={{ width: 280, height: 560, display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative' }}>
+          {/* Notch */}
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 6, padding: '8px 0 4px', background: '#075E54' }}>
+            <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#1c1c1e' }} />
+            <div style={{ width: 60, height: 6, borderRadius: 3, background: '#1c1c1e' }} />
+            <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#1c1c1e' }} />
+          </div>
+          {/* WA Header */}
+          <div style={{ background: '#075E54', padding: '8px 12px', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Avatar name={selConv?.contact.name || '?'} size="sm" />
+            <div style={{ flex: 1 }}>
+              <div style={{ color: 'white', fontSize: 13, fontWeight: 600 }}>{selConv?.contact.name || 'Selecciona contacto'}</div>
+              <div style={{ color: '#b2dfdb', fontSize: 10 }}>en línea</div>
+            </div>
+            <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: 18 }}>⋮</span>
+          </div>
+          {/* Chat area */}
+          <div className="wa-bg" style={{ flex: 1, padding: '8px', overflowY: 'auto', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+            {msg && (
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 4 }}>
+                <div style={{ background: '#d9fdd3', borderRadius: '18px 8px 18px 18px', padding: '6px 10px', maxWidth: '80%', fontSize: 12 }}>
+                  <span style={{ whiteSpace: 'pre-wrap' }}>{msg}</span>
+                  <div style={{ fontSize: 9, color: '#8696a0', textAlign: 'right', marginTop: 2 }}>{nowTime()} ✓</div>
+                </div>
+              </div>
+            )}
+            {flash && (
+              <div style={{ textAlign: 'center' }}>
+                <span style={{ background: '#25d366', color: 'white', borderRadius: 8, padding: '3px 10px', fontSize: 11 }}>¡Enviado!</span>
+              </div>
+            )}
+          </div>
+          {/* Input */}
+          <div style={{ padding: '6px 8px', background: '#f0f2f5', display: 'flex', gap: 6, alignItems: 'center' }}>
+            <input value={msg} onChange={e => setMsg(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') send(); }}
+              placeholder="Escribe un mensaje..."
+              style={{ flex: 1, border: 'none', borderRadius: 20, padding: '6px 12px', fontSize: 12, outline: 'none' }} />
+            <button onClick={send} style={{ background: '#075E54', color: 'white', border: 'none', borderRadius: '50%', width: 32, height: 32, cursor: 'pointer', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>➤</button>
+          </div>
+        </div>
+        {/* Controls */}
+        <div style={{ background: 'white', borderRadius: 16, padding: 20, width: 240, boxShadow: '0 20px 40px rgba(0,0,0,0.3)' }}>
+          <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 12, color: '#111' }}>Simulador de cliente</div>
+          <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 8 }}>Selecciona contacto:</div>
+          <select value={selId} onChange={e => setSelId(e.target.value)}
+            style={{ width: '100%', border: '1px solid #e5e7eb', borderRadius: 8, padding: '6px 10px', fontSize: 12, outline: 'none', marginBottom: 12 }}>
+            {convs.map(c => <option key={c.id} value={c.id}>{c.contact.name} ({c.contact.phone})</option>)}
+          </select>
+          <div style={{ fontSize: 12, color: '#6b7280', marginBottom: 4 }}>Mensaje a enviar:</div>
+          <textarea value={msg} onChange={e => setMsg(e.target.value)} rows={3} placeholder="Escribe el mensaje del cliente..."
+            style={{ width: '100%', border: '1px solid #e5e7eb', borderRadius: 8, padding: '6px 10px', fontSize: 12, resize: 'none', outline: 'none', marginBottom: 12, fontFamily: 'inherit' }} />
+          <div style={{ fontSize: 11, color: '#9ca3af', marginBottom: 8 }}>Mensajes de prueba:</div>
+          {['Hola, ¿qué opciones sin lactosa tienen?', '¿Me pueden hacer un pedido para llevar?', 'Quiero reservar para cumpleaños', 'Tuve un problema con mi pedido 😤', '¿Cuántos puntos tengo?'].map(s => (
+            <div key={s} onClick={() => setMsg(s)} style={{ fontSize: 11, color: '#6F4E37', cursor: 'pointer', padding: '3px 6px', borderRadius: 6, marginBottom: 3, background: '#f9fafb', border: '1px solid #f0f2f5' }}
+              onMouseEnter={e => e.currentTarget.style.background = '#F5E6D3'}
+              onMouseLeave={e => e.currentTarget.style.background = '#f9fafb'}>
+              "{s.slice(0, 42)}{s.length > 42 ? '...' : ''}"
+            </div>
+          ))}
+          <button onClick={send} style={{ width: '100%', background: '#25d366', color: 'white', border: 'none', borderRadius: 10, padding: '10px', fontSize: 13, fontWeight: 700, cursor: 'pointer', marginTop: 8 }}>Enviar mensaje ➤</button>
+          <button onClick={onClose} style={{ width: '100%', background: '#f0f2f5', color: '#374151', border: 'none', borderRadius: 10, padding: '8px', fontSize: 12, cursor: 'pointer', marginTop: 6 }}>Cerrar (ESC)</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── APP ──────────────────────────────────────────────────────────────────────
+function App() {
+  const ref = useRef({});
+  const [convs, setConvs] = useState(INITIAL_CONVS.map(c => ({ ...c, notes: '' })));
+  const [selId, setSelId] = useState('c1');
+  const [showPhone, setShowPhone] = useState(false);
+  const [showProfile, setShowProfile] = useState(true);
+  const [showKpi, setShowKpi] = useState(false);
+  const [toasts, setToasts] = useState([]);
+  const [kpi, setKpi] = useState(KPI_INIT);
+  const [filter, setFilter] = useState('all');
+  const [search, setSearch] = useState('');
+  ref.current = { convs, selId };
+
+  // Push toast
+  const pushToast = useCallback((name, text, convId) => {
+    const id = uid();
+    setToasts(t => [...t, { id, name, text, convId }]);
+    setTimeout(() => setToasts(t => t.map(x => x.id === id ? { ...x, out: true } : x)), 3500);
+    setTimeout(() => setToasts(t => t.filter(x => x.id !== id)), 3800);
+  }, []);
+
+  // Receive message from client
+  const receiveMsg = useCallback((convId, text) => {
+    const { selId: curSel } = ref.current;
+    const msg = { id: uid(), from: 'client', text, time: nowTime() };
+    setConvs(cs => cs.map(c => {
+      if (c.id !== convId) return c;
+      const updated = { ...c, messages: [...c.messages, msg], lastMsg: text, lastTime: nowTime(), unread: c.id !== curSel ? (c.unread || 0) + 1 : 0 };
+      // Auto-bot response
+      if (c.mode === 'bot' || c.mode === 'pending') {
+        const intent = detectIntent(text);
+        const shouldEscalate = intent === 'queja' || intent === 'agente';
+        const botText = getBotResponse(intent, c);
+        const botMsg = { id: uid(), from: 'bot', text: botText, time: nowTime() };
+        if (shouldEscalate) {
+          const sysMsg = { id: uid(), from: 'system', text: 'Escalando a agente humano...', time: nowTime() };
+          setTimeout(() => {
+            setConvs(cs2 => cs2.map(c2 => c2.id !== convId ? c2 : { ...c2, mode: 'agent', messages: [...c2.messages, sysMsg], lastMsg: botText, lastTime: nowTime() }));
+            setKpi(k => ({ ...k, totalToday: k.totalToday + 1 }));
+          }, 1200);
+          return { ...updated, messages: [...updated.messages, botMsg], lastMsg: botText };
+        } else {
+          setTimeout(() => {
+            setConvs(cs2 => cs2.map(c2 => c2.id !== convId ? c2 : { ...c2, mode: 'bot', messages: [...c2.messages, botMsg], lastMsg: botText, lastTime: nowTime() }));
+            setKpi(k => ({ ...k, botResolved: k.botResolved + 1, totalToday: k.totalToday + 1 }));
+          }, 1400);
+          return updated;
+        }
+      }
+      return updated;
+    }));
+    // Toast if not selected
+    const { convs: ccs } = ref.current;
+    const c = ccs.find(x => x.id === convId);
+    if (c && convId !== ref.current.selId) pushToast(c.contact.name, text, convId);
+  }, [pushToast]);
+
+  // Auto messages
+  useEffect(() => {
+    const timers = AUTO_MSGS.map(({ convId, text, delay }) =>
+      setTimeout(() => receiveMsg(convId, text), delay)
+    );
+    return () => timers.forEach(clearTimeout);
+  }, [receiveMsg]);
+
+  const sendMsg = (convId, text, from) => {
+    const msg = { id: uid(), from, text, time: nowTime() };
+    setConvs(cs => cs.map(c => c.id !== convId ? c : { ...c, messages: [...c.messages, msg], lastMsg: text, lastTime: nowTime() }));
+  };
+
+  const takeControl = (convId) => {
+    const sysMsg = { id: uid(), from: 'system', text: 'Agente tomó el control de la conversación', time: nowTime() };
+    setConvs(cs => cs.map(c => c.id !== convId ? c : { ...c, mode: 'agent', messages: [...c.messages, sysMsg], unread: 0 }));
+  };
+
+  const returnBot = (convId) => {
+    const sysMsg = { id: uid(), from: 'system', text: 'Bot retomó la conversación automáticamente', time: nowTime() };
+    setConvs(cs => cs.map(c => c.id !== convId ? c : { ...c, mode: 'bot', messages: [...c.messages, sysMsg] }));
+  };
+
+  const addTag = (convId, tag) => {
+    setConvs(cs => cs.map(c => c.id !== convId ? c : { ...c, contact: { ...c.contact, tags: [...(c.contact.tags || []), tag] } }));
+  };
+
+  const updateNote = (convId, note) => {
+    setConvs(cs => cs.map(c => c.id !== convId ? c : { ...c, notes: note }));
+  };
+
+  const selectConv = (id) => {
+    setSelId(id);
+    setConvs(cs => cs.map(c => c.id !== id ? c : { ...c, unread: 0 }));
+  };
+
+  const exportConv = () => {
+    const conv = convs.find(c => c.id === selId);
+    if (!conv) return;
+    const txt = [`Café Aroma — Exportación de conversación`, `Cliente: ${conv.contact.name}`, `Teléfono: ${conv.contact.phone}`, `Fecha: ${new Date().toLocaleString('es-MX')}`, `Modo: ${conv.mode}`, `Notas: ${conv.notes || 'Sin notas'}`, '', '--- Mensajes ---', ...conv.messages.map(m => `[${m.time}] ${m.from === 'client' ? conv.contact.name : m.from === 'bot' ? 'BOT' : m.from === 'agent' ? 'AGENTE' : '---'}: ${m.text}`)].join('\n');
+    navigator.clipboard?.writeText(txt).then(() => pushToast('Sistema', 'Conversación copiada al portapapeles ✓', null));
+  };
+
+  const activateScenario = (scenario) => {
+    const scenarioMap = { s1: 'c1', s2: 'c1', s3: 'c3', s4: 'c4', s5: 'c2' };
+    const convId = scenarioMap[scenario.id] || 'c1';
+    const msgs = {
+      s1: '¿Tienen opciones sin lactosa? Soy intolerante 🙏',
+      s2: 'Quiero 2 lattes y un sandwich de pavo para recoger en Roma',
+      s3: 'Hola! Quiero reservar para el cumpleaños de mi hija este sábado 🎂',
+      s4: '¿Cuántos puntos tengo acumulados?',
+      s5: 'Mi pedido llegó frío y el servicio estuvo muy mal 😤',
+    };
+    selectConv(convId);
+    setTimeout(() => receiveMsg(convId, msgs[scenario.id] || ''), 300);
+  };
+
+  const resetDemo = () => {
+    setConvs(INITIAL_CONVS.map(c => ({ ...c, notes: '' })));
+    setSelId('c1');
+    setToasts([]);
+    setKpi(KPI_INIT);
+    setSearch('');
+    setFilter('all');
+    setShowProfile(true);
+  };
+
+  const selConv = convs.find(c => c.id === selId) || null;
+  const filteredConvs = convs.filter(c => {
+    if (filter !== 'all' && c.mode !== filter) return false;
+    if (search && !c.contact.name.toLowerCase().includes(search.toLowerCase()) && !c.lastMsg.toLowerCase().includes(search.toLowerCase())) return false;
+    return true;
+  });
+
+  return (
+    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: '#f0f2f5' }}>
+      {/* Top bar */}
+      <div style={{ background: BRAND.color, padding: '0 16px', height: 56, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <a href="/" style={{ color: 'rgba(255,255,255,0.75)', fontSize: 12, fontWeight: 600, textDecoration: 'none', background: 'rgba(255,255,255,0.12)', borderRadius: 8, padding: '4px 10px', border: '1px solid rgba(255,255,255,0.2)' }}>← Portfolio</a>
+          <div>
+            <div style={{ color: 'white', fontWeight: 700, fontSize: 15, letterSpacing: '-0.01em' }}>Café Aroma</div>
+            <div style={{ color: 'rgba(255,255,255,0.75)', fontSize: 11 }}>DevWhats — Panel de atención</div>
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 4 }}>
+            {[
+              { id: 'all', label: `Todas (${convs.length})` },
+              { id: 'bot', label: `Bot (${convs.filter(c => c.mode === 'bot').length})` },
+              { id: 'agent', label: `Agente (${convs.filter(c => c.mode === 'agent').length})` },
+              { id: 'pending', label: `Pendiente (${convs.filter(c => c.mode === 'pending').length})` },
+            ].map(f => (
+              <button key={f.id} onClick={() => setFilter(f.id)}
+                style={{ background: filter === f.id ? 'rgba(255,255,255,0.25)' : 'transparent', color: 'white', border: '1px solid rgba(255,255,255,0.3)', borderRadius: 8, padding: '4px 10px', fontSize: 11, cursor: 'pointer', fontWeight: filter === f.id ? 700 : 400 }}>
+                {f.label}
+              </button>
+            ))}
+          </div>
+          <button onClick={() => setShowKpi(k => !k)} style={{ background: 'rgba(255,255,255,0.15)', color: 'white', border: '1px solid rgba(255,255,255,0.3)', borderRadius: 8, padding: '4px 10px', fontSize: 11, cursor: 'pointer' }}>Métricas</button>
+          <button onClick={resetDemo} style={{ background: 'rgba(255,255,255,0.15)', color: 'white', border: '1px solid rgba(255,255,255,0.3)', borderRadius: 8, padding: '4px 10px', fontSize: 11, cursor: 'pointer' }}>↺ Reset</button>
+          <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: 8, padding: '4px 10px', fontSize: 11, color: 'white', display: 'flex', alignItems: 'center', gap: 4 }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#4ade80', display: 'inline-block' }} />
+            Ana García
+          </div>
+        </div>
+      </div>
+
+      {/* KPI bar */}
+      {showKpi && <KpiBar kpi={kpi} show={showKpi} onToggle={() => setShowKpi(k => !k)} />}
+
+      {/* Main */}
+      <div style={{ flex: 1, display: 'flex', minHeight: 0 }}>
+        {/* Conversation list */}
+        <div style={{ width: 320, background: 'white', borderRight: '1px solid #e9ecef', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
+          {/* Search */}
+          <div style={{ padding: '10px 12px', borderBottom: '1px solid #f0f2f5' }}>
+            <div style={{ position: 'relative' }}>
+              <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#9ca3af', fontSize: 14 }}>⌕</span>
+              <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar conversación..."
+                style={{ width: '100%', border: '1px solid #e5e7eb', borderRadius: 20, padding: '8px 12px 8px 32px', fontSize: 13, outline: 'none', background: '#f9fafb' }} />
+              {search && <button onClick={() => setSearch('')} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', fontSize: 14 }}>×</button>}
+            </div>
+          </div>
+          {/* Conv list */}
+          <div style={{ flex: 1, overflowY: 'auto' }}>
+            {filteredConvs.length === 0 && (
+              <div style={{ padding: 24, textAlign: 'center', color: '#9ca3af', fontSize: 13 }}>No hay conversaciones{search ? ` con "${search}"` : ''}</div>
+            )}
+            {filteredConvs.map(c => (
+              <ConvItem key={c.id} conv={c} selected={c.id === selId} onClick={() => selectConv(c.id)} />
+            ))}
+          </div>
+          {/* Scenario panel */}
+          <ScenarioPanel onActivate={activateScenario} />
+        </div>
+
+        {/* Chat area */}
+        <ChatPanel
+          conv={selConv}
+          onSend={sendMsg}
+          onTakeControl={takeControl}
+          onReturnBot={returnBot}
+          showProfile={showProfile}
+          onToggleProfile={() => setShowProfile(p => !p)}
+          onExport={exportConv}
+        />
+
+        {/* Client profile */}
+        {showProfile && selConv && (
+          <ClientPanel conv={selConv} onAddTag={addTag} onUpdateNote={updateNote} onClose={() => setShowProfile(false)} />
+        )}
+      </div>
+
+      {/* Phone FAB */}
+      <button onClick={() => setShowPhone(true)} title="Simulador de cliente WhatsApp"
+        style={{ position: 'fixed', bottom: 24, left: 24, width: 56, height: 56, borderRadius: '50%', background: '#25d366', color: 'white', border: 'none', cursor: 'pointer', fontSize: 24, boxShadow: '0 4px 16px rgba(37,211,102,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, transition: 'transform 0.2s' }}
+        onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'}
+        onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="white">
+          <path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.555 4.116 1.53 5.845L0 24l6.345-1.499A11.93 11.93 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm5.894 16.634c-.247.693-1.448 1.322-1.995 1.378-.547.056-1.05.253-3.548-.74-3.006-1.187-4.93-4.27-5.08-4.47-.148-.2-1.204-1.603-1.204-3.057s.76-2.168 1.03-2.461c.268-.294.585-.367.78-.367.196 0 .39.002.562.01.18.008.422-.068.66.505.247.587.84 2.04.914 2.188.073.148.122.32.025.515-.098.196-.147.317-.294.49-.147.172-.31.384-.44.516-.147.147-.3.307-.13.602.171.294.761 1.254 1.634 2.03 1.122 1.002 2.07 1.312 2.365 1.46.294.147.465.123.636-.074.171-.196.733-.854.929-1.148.196-.294.39-.245.66-.147.27.098 1.716.81 2.012.957.294.147.49.22.562.343.073.122.073.71-.174 1.404z"/>
+        </svg>
+      </button>
+
+      {/* Phone simulator modal */}
+      {showPhone && <PhoneSimulator convs={convs} onReceive={receiveMsg} onClose={() => setShowPhone(false)} />}
+
+      {/* Toasts */}
+      <Toast toasts={toasts} onDismiss={id => setToasts(t => t.filter(x => x.id !== id))} />
+
+      {/* Bottom label */}
+      <div style={{ textAlign: 'center', padding: '6px', background: 'white', borderTop: '1px solid #f0f2f5', fontSize: 11, color: '#9ca3af' }}>
+        Café Aroma × DevWhats — Demo Comercial AOVA — Abre el simulador para enviar mensajes como cliente
+      </div>
+    </div>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+</script>
+</body>
+</html>
