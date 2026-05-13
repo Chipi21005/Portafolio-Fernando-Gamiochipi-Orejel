@@ -491,63 +491,11 @@
 
     </div>
 
-    <!-- QR section -->
-    <section class="qr-section">
-      <img
-        class="qr-image"
-        src="data:image/png;base64,{{ qr_b64 }}"
-        alt="QR code para acceder al portfolio desde telefono"
-        width="148"
-        height="148"
-      />
-      <div class="qr-info">
-        <div class="qr-heading">Escanea para abrir en tu telefono</div>
-        <p class="qr-sub">
-          Cualquier dispositivo en la misma red Wi-Fi puede acceder al portfolio completo.
-          Escanea el codigo QR o abre la URL directamente.
-        </p>
-        <div class="url-row">
-          <span class="url-pill" id="network-url" title="Selecciona para copiar">{{ network_url }}</span>
-          <button class="copy-btn" id="copy-btn" type="button">Copiar URL</button>
-        </div>
-      </div>
-    </section>
-
     <footer class="footer">
-      <p>Fernando Gamiochipi Orejel &middot; Ing. en Sistemas &middot; AOVA</p>
+      <p>Fernando Gamiochipi Orejel &middot; Ing. en Sistemas</p>
     </footer>
 
   </div>
 
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
-
-  <script>
-    (function () {
-      var toast = document.getElementById('toast');
-      var timer;
-      function showToast(msg) {
-        toast.textContent = msg;
-        toast.classList.add('show');
-        clearTimeout(timer);
-        timer = setTimeout(function () { toast.classList.remove('show'); }, 2200);
-      }
-      document.getElementById('copy-btn').addEventListener('click', function () {
-        var url = document.getElementById('network-url').textContent.trim();
-        if (navigator.clipboard && window.isSecureContext) {
-          navigator.clipboard.writeText(url).then(function () { showToast('URL copiada al portapapeles'); });
-        } else {
-          var ta = document.createElement('textarea');
-          ta.value = url;
-          ta.style.position = 'fixed';
-          ta.style.left = '-9999px';
-          document.body.appendChild(ta);
-          ta.select();
-          try { document.execCommand('copy'); showToast('URL copiada al portapapeles'); }
-          catch (e) { showToast('Selecciona el texto y copia manualmente'); }
-          document.body.removeChild(ta);
-        }
-      });
-    })();
-  </script>
 </body>
 </html>
