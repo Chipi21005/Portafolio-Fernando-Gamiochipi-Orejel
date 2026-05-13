@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fernando Gamiochipi — Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet" />
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-color: #07100e;
+      --main-color: #2de2a7;
+      --blue: #38bdf8;
+      --text-color: #1a2e28;
+      --second-text: #4a7a6d;
+      --white-color: #effaf7;
+      --cover-color: linear-gradient(135deg, #2de2a7, #0d9e72);
+      --pages-color: linear-gradient(90deg, #f0faf7, #d8f0ea);
+      --shadow: 0 25px 60px rgba(0,0,0,.55);
+      --flip-duration: 1s;
+      --flip-ease: cubic-bezier(.645,.045,.355,1);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-color);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+      color: var(--text-color);
+    }
+
+    /* ── back link ── */
+    .back-link {
+      position: fixed;
+      top: 1.25rem;
+      left: 1.5rem;
+      color: var(--main-color);
+      font-size: .8rem;
+      font-weight: 600;
+      text-decoration: none;
+      letter-spacing: .05em;
+      opacity: .75;
+      transition: opacity .2s;
+      z-index: 200;
+    }
+    .back-link:hover { opacity: 1; }
+
+    /* ── book wrapper ── */
+    .wrapper {
+      perspective: 250rem;
+      width: 66rem;
+      height: 45rem;
+      position: relative;
+    }
+
+    @keyframes show-animate {
+      0%   { transform: rotateY(-20deg); opacity: 0; }
+      100% { transform: rotateY(0deg);  opacity: 1; }
+    }
+
+    /* ── book ── */
+    .book {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      animation: show-animate .9s ease forwards;
+    }
+
+    /* ── pages ── */
+    .page {
+      width: 50%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      transform-style: preserve-3d;
+      transition: transform var(--flip-duration) var(--flip-ease);
+    }
+    .page-left  { left: 0;   transform-origin: right center; }
+    .page-right { right: 0;  transform-origin: left center; }
+
+    .page-front,
+    .page-back {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0; left: 0;
+      backface-visibility: hidden;
+      overflow: hidden;
+    }
+    .page-front { background: var(--pages-color); transform: translateZ(1px); }
+    .page-back  { background: var(--pages-color); transform: rotateY(180deg) translateZ(1px); }
+
+    /* turned state */
+    .page-right.turn { transform: rotateY(-180deg); }
+
+    /* cover */
+    .cover-left,
+    .cover-right {
+      width: 50%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      transform-style: preserve-3d;
+      transition: transform var(--flip-duration) var(--flip-ease);
+    }
+    .cover-left  { left: 0;  border-radius: .5rem 0 0 .5rem; background: var(--cover-color); z-index: 10; }
+    .cover-right { right: 0; transform-origin: left center; border-radius: 0 .5rem .5rem 0; background: var(--cover-color); z-index: 10; }
+    .cover-right.turn { transform: rotateY(-180deg); }
+
+    /* cover face / back */
+    .cover-face,
+    .cover-back {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0; left: 0;
+      backface-visibility: hidden;
+      border-radius: 0 .5rem .5rem 0;
+      overflow: hidden;
+    }
+    .cover-face { background: var(--cover-color); }
+    .cover-back { background: var(--pages-color); transform: rotateY(180deg); }
+
+    /* shadow strip (spine) */
+    .spine {
+      position: absolute;
+      top: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 8px;
+      height: 100%;
+      background: rgba(0,0,0,.18);
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    /* box shadow on book */
+    .book::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      box-shadow: var(--shadow);
+      pointer-events: none;
+      border-radius: .5rem;
+    }
+
+    /* ── z-index layering for flip order ── */
+    #p1  { z-index: 9; }
+    #p2  { z-index: 8; }
+    #p3  { z-index: 7; }
+    #p4  { z-index: 6; }
+    #p5  { z-index: 5; }
+    #p6  { z-index: 4; }
+
+    /* ── page nav arrows ── */
+    .nav-btn {
+      position: absolute;
+      bottom: 1.5rem;
+      background: rgba(45,226,167,.15);
+      border: 1px solid rgba(45,226,167,.35);
+      color: var(--main-color);
+      width: 2.4rem;
+      height: 2.4rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.15rem;
+      transition: background .2s, transform .15s;
+      z-index: 1;
+    }
+    .nav-btn:hover { background: rgba(45,226,167,.3); transform: scale(1.08); }
+    .nav-btn.prev { left: 1.25rem; }
+    .nav-btn.next { right: 1.25rem; }
+    .nav-btn:disabled { opacity: .3; cursor: default; transform: none; }
+
+    /* page counter */
+    .page-counter {
+      position: absolute;
+      bottom: 1.6rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: .7rem;
+      color: var(--second-text);
+      font-weight: 600;
+      letter-spacing: .07em;
+      pointer-events: none;
+    }
+
+    /* ── COVER CONTENT ── */
+    .cover-face-inner {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      padding: 2.5rem;
+      text-align: center;
+    }
+    .cover-title {
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: #07100e;
+      line-height: 1.1;
+    }
+    .cover-sub {
+      font-size: .95rem;
+      color: rgba(7,16,14,.7);
+      font-weight: 600;
+    }
+    .cover-year {
+      margin-top: .5rem;
+      font-size: .75rem;
+      color: rgba(7,16,14,.5);
+      font-weight: 700;
+      letter-spacing: .1em;
+    }
+    .cover-icon {
+      font-size: 3rem;
+      color: rgba(7,16,14,.6);
+    }
+
+    /* ── PROFILE PAGE (left cover face) ── */
+    .profile-page {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.1rem;
+      padding: 2rem;
+      text-align: center;
+      background: var(--cover-color);
+    }
+    .profile-photo {
+      width: 8.5rem;
+      height: 8.5rem;
+      border-radius: 50%;
+      object-fit: cover;
+      object-position: center top;
+      border: 3px solid rgba(7,16,14,.25);
+      box-shadow: 0 8px 24px rgba(0,0,0,.3);
+    }
+    .profile-name {
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: #07100e;
+      line-height: 1.15;
+    }
+    .profile-title {
+      font-size: .85rem;
+      color: rgba(7,16,14,.65);
+      font-weight: 600;
+    }
+    .profile-badge {
+      background: rgba(7,16,14,.12);
+      color: #07100e;
+      font-size: .7rem;
+      font-weight: 700;
+      padding: .3rem .85rem;
+      border-radius: 2rem;
+      letter-spacing: .04em;
+    }
+    .profile-contacts {
+      display: flex;
+      flex-direction: column;
+      gap: .4rem;
+      width: 100%;
+    }
+    .profile-contact-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .45rem;
+      font-size: .78rem;
+      color: rgba(7,16,14,.7);
+      font-weight: 600;
+    }
+    .profile-contact-row i { font-size: 1rem; color: #07100e; }
+
+    /* ── PAGE CONTENT ── */
+    .page-content {
+      width: 100%;
+      height: 100%;
+      padding: 2rem 2.2rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+    }
+    .page-content::-webkit-scrollbar { width: 4px; }
+    .page-content::-webkit-scrollbar-track { background: transparent; }
+    .page-content::-webkit-scrollbar-thumb { background: rgba(45,226,167,.35); border-radius: 4px; }
+
+    .page-heading {
+      font-size: .65rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      color: var(--second-text);
+      text-transform: uppercase;
+      border-bottom: 1.5px solid rgba(45,226,167,.35);
+      padding-bottom: .5rem;
+    }
+    .page-heading span {
+      color: var(--main-color);
+    }
+
+    /* section title inside page */
+    .sec-title {
+      font-size: 1.1rem;
+      font-weight: 900;
+      color: var(--text-color);
+      line-height: 1.2;
+    }
+
+    /* ── experience ── */
+    .exp-item {
+      display: flex;
+      flex-direction: column;
+      gap: .2rem;
+    }
+    .exp-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: .5rem;
+      flex-wrap: wrap;
+    }
+    .exp-role {
+      font-size: .85rem;
+      font-weight: 700;
+      color: var(--text-color);
+    }
+    .exp-date {
+      font-size: .7rem;
+      font-weight: 600;
+      color: var(--second-text);
+      white-space: nowrap;
+    }
+    .exp-company {
+      font-size: .78rem;
+      font-weight: 600;
+      color: var(--main-color);
+    }
+    .exp-desc {
+      font-size: .75rem;
+      color: var(--second-text);
+      line-height: 1.5;
+    }
+    .exp-divider {
+      border: none;
+      border-top: 1px solid rgba(45,226,167,.18);
+    }
+
+    /* ── skills ── */
+    .skill-item {
+      display: flex;
+      flex-direction: column;
+      gap: .35rem;
+    }
+    .skill-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: .75rem;
+      font-weight: 600;
+      color: var(--text-color);
+    }
+    .skill-label span { color: var(--second-text); }
+    .skill-track {
+      height: 5px;
+      background: rgba(45,226,167,.18);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .skill-bar {
+      height: 100%;
+      background: var(--main-color);
+      border-radius: 99px;
+      width: 0%;
+      transition: width 1s ease;
+    }
+    .skill-bar.blue { background: var(--blue); }
+
+    /* ── tags ── */
+    .tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .4rem;
+    }
+    .tag {
+      background: rgba(45,226,167,.12);
+      color: var(--text-color);
+      font-size: .7rem;
+      font-weight: 600;
+      padding: .25rem .65rem;
+      border-radius: 2rem;
+      border: 1px solid rgba(45,226,167,.25);
+    }
+
+    /* ── education ── */
+    .edu-title {
+      font-size: .85rem;
+      font-weight: 700;
+      color: var(--text-color);
+    }
+    .edu-school {
+      font-size: .78rem;
+      font-weight: 600;
+      color: var(--main-color);
+    }
+    .edu-date {
+      font-size: .7rem;
+      color: var(--second-text);
+      font-weight: 600;
+    }
+
+    /* ── languages ── */
+    .lang-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: .78rem;
+      font-weight: 600;
+      color: var(--text-color);
+    }
+    .lang-level {
+      font-size: .7rem;
+      color: var(--second-text);
+      font-weight: 600;
+    }
+
+    /* ── references ── */
+    .ref-item { display: flex; flex-direction: column; gap: .15rem; }
+    .ref-name { font-size: .85rem; font-weight: 700; color: var(--text-color); }
+    .ref-org  { font-size: .75rem; font-weight: 600; color: var(--main-color); }
+    .ref-tel  { font-size: .73rem; color: var(--second-text); }
+
+    /* ── contact page ── */
+    .contact-header {
+      text-align: center;
+    }
+    .contact-form {
+      display: flex;
+      flex-direction: column;
+      gap: .7rem;
+    }
+    .contact-field {
+      display: flex;
+      flex-direction: column;
+      gap: .25rem;
+    }
+    .contact-field label {
+      font-size: .7rem;
+      font-weight: 700;
+      color: var(--second-text);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+    .contact-field input,
+    .contact-field textarea {
+      font-family: 'Inter', sans-serif;
+      font-size: .8rem;
+      background: rgba(45,226,167,.08);
+      border: 1px solid rgba(45,226,167,.25);
+      border-radius: .4rem;
+      color: var(--text-color);
+      padding: .55rem .8rem;
+      resize: none;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .contact-field input:focus,
+    .contact-field textarea:focus { border-color: var(--main-color); }
+    .contact-submit {
+      background: var(--main-color);
+      color: #07100e;
+      font-family: 'Inter', sans-serif;
+      font-size: .8rem;
+      font-weight: 700;
+      border: none;
+      border-radius: .4rem;
+      padding: .65rem 1.5rem;
+      cursor: pointer;
+      align-self: flex-start;
+      transition: opacity .2s, transform .15s;
+    }
+    .contact-submit:hover { opacity: .85; transform: translateY(-1px); }
+
+    .contact-direct {
+      display: flex;
+      flex-direction: column;
+      gap: .55rem;
+    }
+    .contact-row {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      font-size: .8rem;
+      color: var(--second-text);
+      font-weight: 600;
+    }
+    .contact-row i { font-size: 1.1rem; color: var(--main-color); }
+
+    /* ── contact me button (outside book) ── */
+    .contact-btn-wrap {
+      margin-top: 1.5rem;
+      display: flex;
+      gap: 1rem;
+    }
+    .contact-btn {
+      background: var(--main-color);
+      color: #07100e;
+      font-family: 'Inter', sans-serif;
+      font-size: .82rem;
+      font-weight: 700;
+      border: none;
+      border-radius: .45rem;
+      padding: .6rem 1.6rem;
+      cursor: pointer;
+      letter-spacing: .04em;
+      transition: opacity .2s, transform .15s;
+    }
+    .contact-btn:hover { opacity: .85; transform: translateY(-1px); }
+    .contact-btn.secondary {
+      background: transparent;
+      border: 1.5px solid rgba(45,226,167,.4);
+      color: var(--main-color);
+    }
+    .contact-btn.secondary:hover { background: rgba(45,226,167,.08); }
+
+    /* ── MOBILE VERTICAL FALLBACK (< 600px) ── */
+    @media (max-width: 599px) {
+      .wrapper { display: none; }
+      .contact-btn-wrap { display: none; }
+      .back-link { top: .75rem; left: 1rem; }
+
+      .mobile-cv {
+        display: flex;
+        flex-direction: column;
+        gap: 1.75rem;
+        width: 100%;
+        max-width: 420px;
+        padding-top: 3rem;
+      }
+
+      .mob-card {
+        background: #0d1f1b;
+        border: 1px solid rgba(45,226,167,.18);
+        border-radius: .75rem;
+        padding: 1.4rem 1.25rem;
+        display: flex;
+        flex-direction: column;
+        gap: .85rem;
+      }
+      .mob-card-head {
+        font-size: .65rem;
+        font-weight: 700;
+        letter-spacing: .12em;
+        color: var(--main-color);
+        text-transform: uppercase;
+        border-bottom: 1px solid rgba(45,226,167,.2);
+        padding-bottom: .5rem;
+      }
+
+      .mob-profile {
+        align-items: center;
+        text-align: center;
+      }
+      .mob-profile-photo {
+        width: 7rem;
+        height: 7rem;
+        border-radius: 50%;
+        object-fit: cover;
+        object-position: center top;
+        border: 2px solid rgba(45,226,167,.4);
+      }
+      .mob-name {
+        font-size: 1.3rem;
+        font-weight: 900;
+        color: var(--white-color);
+      }
+      .mob-sub {
+        font-size: .82rem;
+        color: var(--second-text);
+        font-weight: 600;
+      }
+      .mob-badge {
+        background: rgba(45,226,167,.1);
+        color: var(--main-color);
+        font-size: .68rem;
+        font-weight: 700;
+        padding: .3rem .8rem;
+        border-radius: 2rem;
+        letter-spacing: .04em;
+        border: 1px solid rgba(45,226,167,.25);
+        align-self: center;
+      }
+      .mob-contact-row {
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+        font-size: .78rem;
+        color: var(--second-text);
+        font-weight: 600;
+      }
+      .mob-contact-row i { font-size: 1rem; color: var(--main-color); }
+
+      .mob-exp-role { font-size: .84rem; font-weight: 700; color: var(--white-color); }
+      .mob-exp-company { font-size: .76rem; font-weight: 600; color: var(--main-color); }
+      .mob-exp-date { font-size: .7rem; color: var(--second-text); font-weight: 600; }
+      .mob-exp-desc { font-size: .74rem; color: var(--second-text); line-height: 1.5; }
+      .mob-divider { border: none; border-top: 1px solid rgba(45,226,167,.1); }
+
+      .mob-skill { display: flex; flex-direction: column; gap: .35rem; }
+      .mob-skill-label {
+        display: flex; justify-content: space-between;
+        font-size: .75rem; font-weight: 600; color: var(--white-color);
+      }
+      .mob-skill-label span { color: var(--second-text); }
+      .mob-skill-track { height: 5px; background: rgba(45,226,167,.15); border-radius: 99px; overflow: hidden; }
+      .mob-skill-bar { height: 100%; border-radius: 99px; background: var(--main-color); transition: width 1s ease; }
+      .mob-skill-bar.blue { background: var(--blue); }
+
+      .mob-tag-list { display: flex; flex-wrap: wrap; gap: .35rem; }
+      .mob-tag {
+        background: rgba(45,226,167,.08);
+        color: var(--second-text);
+        font-size: .7rem;
+        font-weight: 600;
+        padding: .2rem .6rem;
+        border-radius: 2rem;
+        border: 1px solid rgba(45,226,167,.2);
+      }
+
+      .mob-ref-name { font-size: .84rem; font-weight: 700; color: var(--white-color); }
+      .mob-ref-org  { font-size: .76rem; font-weight: 600; color: var(--main-color); }
+      .mob-ref-tel  { font-size: .72rem; color: var(--second-text); }
+
+      .mob-contact-btn {
+        background: var(--main-color);
+        color: #07100e;
+        font-family: 'Inter', sans-serif;
+        font-size: .82rem;
+        font-weight: 700;
+        border: none;
+        border-radius: .4rem;
+        padding: .65rem 1.4rem;
+        cursor: pointer;
+        align-self: flex-start;
+        text-decoration: none;
+        display: inline-block;
+        transition: opacity .2s;
+      }
+      .mob-contact-btn:hover { opacity: .85; }
+    }
+
+    /* ── TABLET SCALING (600–899px) ── */
+    @media (min-width: 600px) and (max-width: 899px) {
+      .mobile-cv { display: none; }
+      .wrapper {
+        width: 90vw;
+        height: calc(90vw * (45/66));
+        perspective: 200rem;
+      }
+      .cover-title { font-size: 1.5rem; }
+      .sec-title { font-size: .9rem; }
+      .exp-role, .edu-title, .ref-name { font-size: .78rem; }
+      .page-content { padding: 1.4rem 1.6rem; gap: .85rem; }
+    }
+
+    /* ── DESKTOP (≥ 900px) ── */
+    @media (min-width: 900px) {
+      .mobile-cv { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <a href="/" class="back-link">← Portfolio</a>
+
+  <!-- ══════════════ DESKTOP BOOK ══════════════ -->
+  <div class="wrapper" id="book-wrapper">
+    <div class="book" id="book">
+
+      <!-- spine -->
+      <div class="spine"></div>
+
+      <!-- ── LEFT COVER (profile) ── -->
+      <div class="cover-left" id="cover-left">
+        <div class="profile-page">
+          <img src="foto_perfil.jpg" alt="Fernando Gamiochipi" class="profile-photo" />
+          <div class="profile-name">Fernando Gamiochipi Orejel</div>
+          <div class="profile-title">Estudiante de Ingeniería en Sistemas</div>
+          <div class="profile-badge">Disponible para proyectos junior tech</div>
+          <div class="profile-contacts">
+            <div class="profile-contact-row"><i class='bx bx-phone'></i>55 2967 2982</div>
+            <div class="profile-contact-row"><i class='bx bx-envelope'></i>orejelfernando51@gmail.com</div>
+            <div class="profile-contact-row"><i class='bx bx-map'></i>CDMX, México</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── RIGHT COVER ── -->
+      <div class="cover-right" id="cover-right">
+        <div class="cover-face">
+          <div class="cover-face-inner">
+            <i class='bx bx-code-alt cover-icon'></i>
+            <div class="cover-title">Portfolio<br/>2025</div>
+            <div class="cover-sub">Fernando Gamiochipi Orejel</div>
+            <div class="cover-year">Ing. en Sistemas · AOVA</div>
+          </div>
+        </div>
+        <div class="cover-back">
+          <!-- back of right cover = front of page 1 right -->
+        </div>
+      </div>
+
+      <!-- ── PAGE 1: Experiencia ── -->
+      <div class="page page-right" id="p1">
+        <div class="page-front page-content">
+          <div class="page-heading"><span>01</span> / Experiencia</div>
+          <div class="sec-title">Experiencia Profesional</div>
+
+          <div class="exp-item">
+            <div class="exp-header">
+              <div class="exp-role">Co-Fundador &amp; Dev Lead</div>
+              <div class="exp-date">2025 – Presente</div>
+            </div>
+            <div class="exp-company">AOVA — Studio de Software &amp; Automatización</div>
+            <div class="exp-desc">Desarrollo de MVPs, automatizaciones con IA y demos comerciales para clientes. Arquitectura de soluciones backend/frontend y gestión de proyectos.</div>
+          </div>
+          <hr class="exp-divider" />
+
+          <div class="exp-item">
+            <div class="exp-header">
+              <div class="exp-role">Técnico en Videovigilancia IP</div>
+              <div class="exp-date">Sep 2024 – Sep 2025</div>
+            </div>
+            <div class="exp-company">LTP Global Software</div>
+            <div class="exp-desc">Instalación y configuración de sistemas Axxon One, cámaras IP, NVR y gestión de redes de videovigilancia en proyectos corporativos.</div>
+          </div>
+          <hr class="exp-divider" />
+
+          <div class="exp-item">
+            <div class="exp-header">
+              <div class="exp-role">Operador &amp; Soporte Técnico</div>
+              <div class="exp-date">Ene 2024 – Sep 2024</div>
+            </div>
+            <div class="exp-company">SC Impresiones</div>
+            <div class="exp-desc">Operación de maquinaria de impresión, soporte técnico interno y mantenimiento de equipos de cómputo y periféricos.</div>
+          </div>
+          <hr class="exp-divider" />
+
+          <div class="exp-item">
+            <div class="exp-header">
+              <div class="exp-role">Supervisor de Operaciones</div>
+              <div class="exp-date">Jul 2021 – Ago 2023</div>
+            </div>
+            <div class="exp-company">VS Cleaning</div>
+            <div class="exp-desc">Coordinación de equipos de trabajo, control de inventario y gestión operativa en campo.</div>
+          </div>
+        </div>
+        <div class="page-back page-content">
+          <!-- back of p1 = visible when p1 is flipped (left side of spread 2) -->
+          <div class="page-heading"><span>02</span> / Habilidades — continuación</div>
+          <div class="sec-title">Herramientas &amp; Entornos</div>
+          <div class="tag-list">
+            <span class="tag">Axxon One</span>
+            <span class="tag">HIKVISION</span>
+            <span class="tag">Redes IP</span>
+            <span class="tag">Python</span>
+            <span class="tag">JavaScript</span>
+            <span class="tag">React</span>
+            <span class="tag">Flask</span>
+            <span class="tag">C / C++</span>
+            <span class="tag">Git</span>
+            <span class="tag">Linux CLI</span>
+            <span class="tag">Illustrator</span>
+            <span class="tag">AutoCAD</span>
+            <span class="tag">Prompt Engineering</span>
+            <span class="tag">OpenAI API</span>
+            <span class="tag">Tailwind CSS</span>
+            <span class="tag">WhatsApp Business API</span>
+          </div>
+          <div class="sec-title" style="margin-top:.5rem">Idiomas</div>
+          <div style="display:flex;flex-direction:column;gap:.5rem">
+            <div class="lang-item">Español <span class="lang-level">Nativo</span></div>
+            <div class="lang-item">Inglés  <span class="lang-level">C1 — Avanzado</span></div>
+          </div>
+          <div class="sec-title" style="margin-top:.5rem">Intereses</div>
+          <div class="tag-list">
+            <span class="tag">IA Generativa</span>
+            <span class="tag">Automatización</span>
+            <span class="tag">Desarrollo Web</span>
+            <span class="tag">Videovigilancia IP</span>
+            <span class="tag">Redes &amp; Sistemas</span>
+            <span class="tag">Soporte Técnico</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PAGE 2: Habilidades ── -->
+      <div class="page page-right" id="p2">
+        <div class="page-front page-content">
+          <div class="page-heading"><span>02</span> / Habilidades</div>
+          <div class="sec-title">Stack Técnico</div>
+
+          <div class="skill-item">
+            <div class="skill-label">Axxon One / CCTV IP <span>90%</span></div>
+            <div class="skill-track"><div class="skill-bar" data-width="90"></div></div>
+          </div>
+          <div class="skill-item">
+            <div class="skill-label">Cámaras IP &amp; NVR <span>92%</span></div>
+            <div class="skill-track"><div class="skill-bar" data-width="92"></div></div>
+          </div>
+          <div class="skill-item">
+            <div class="skill-label">IA &amp; Prompt Engineering <span>85%</span></div>
+            <div class="skill-track"><div class="skill-bar" data-width="85"></div></div>
+          </div>
+          <div class="skill-item">
+            <div class="skill-label">Python <span>85%</span></div>
+            <div class="skill-track"><div class="skill-bar" data-width="85"></div></div>
+          </div>
+          <div class="skill-item">
+            <div class="skill-label">JavaScript <span>75%</span></div>
+            <div class="skill-track"><div class="skill-bar blue" data-width="75"></div></div>
+          </div>
+          <div class="skill-item">
+            <div class="skill-label">Redes &amp; Sistemas <span>70%</span></div>
+            <div class="skill-track"><div class="skill-bar blue" data-width="70"></div></div>
+          </div>
+          <div class="skill-item">
+            <div class="skill-label">C / C++ <span>65%</span></div>
+            <div class="skill-track"><div class="skill-bar" data-width="65"></div></div>
+          </div>
+          <div class="skill-item">
+            <div class="skill-label">Illustrator <span>55%</span></div>
+            <div class="skill-track"><div class="skill-bar blue" data-width="55"></div></div>
+          </div>
+          <div class="skill-item">
+            <div class="skill-label">AutoCAD <span>50%</span></div>
+            <div class="skill-track"><div class="skill-bar" data-width="50"></div></div>
+          </div>
+        </div>
+        <div class="page-back page-content">
+          <div class="page-heading"><span>03</span> / Formación — continuación</div>
+          <div class="sec-title">Certificaciones &amp; Cursos</div>
+          <div class="tag-list">
+            <span class="tag">Axxon One (LTP Global)</span>
+            <span class="tag">Cámaras IP HIKVISION</span>
+            <span class="tag">Inglés C1 — Certificado</span>
+            <span class="tag">Python para IA</span>
+            <span class="tag">Fundamentos de Redes</span>
+          </div>
+          <div class="sec-title" style="margin-top:.75rem">Actividades</div>
+          <div class="exp-desc">
+            Desarrollo de proyectos personales de automatización con Python e IA generativa. Construcción de demos comerciales para clientes de AOVA. Participación activa en la comunidad de ingeniería de sistemas de la Universidad Anáhuac Norte.
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PAGE 3: Formación ── -->
+      <div class="page page-right" id="p3">
+        <div class="page-front page-content">
+          <div class="page-heading"><span>03</span> / Formación</div>
+          <div class="sec-title">Educación</div>
+
+          <div style="display:flex;flex-direction:column;gap:.35rem">
+            <div class="edu-title">Ingeniería en Sistemas Computacionales</div>
+            <div class="edu-school">Universidad Anáhuac Norte</div>
+            <div class="edu-date">Enero 2025 – Presente</div>
+            <div class="exp-desc">Carrera enfocada en desarrollo de software, redes, sistemas operativos e inteligencia artificial. Cursando actualmente los primeros semestres con enfoque en programación y arquitectura de sistemas.</div>
+          </div>
+
+          <hr class="exp-divider" />
+
+          <div class="sec-title">Perfil Profesional</div>
+          <div class="exp-desc">
+            Estudiante de Ingeniería en Sistemas con experiencia práctica en videovigilancia IP, automatización con Python e IA, y desarrollo web. Co-fundador de AOVA, estudio de software donde desarrollo MVPs y demos comerciales para clientes reales. Orientado a resultados, con capacidad para trabajar de forma independiente y en equipo.
+          </div>
+        </div>
+        <div class="page-back page-content">
+          <div class="page-heading"><span>04</span> / Referencias — intro</div>
+          <div class="sec-title">Referencias Profesionales</div>
+          <div class="exp-desc" style="line-height:1.7">
+            Las siguientes personas pueden dar fe de mi desempeño profesional, puntualidad, actitud y habilidades técnicas durante los periodos en que colaboramos.
+          </div>
+
+          <div class="ref-item" style="margin-top:.5rem">
+            <div class="ref-name">Perla Vargas Servín</div>
+            <div class="ref-org">Directivo — LTP Global Software</div>
+            <div class="ref-tel">55 5413 9231</div>
+          </div>
+          <hr class="exp-divider" />
+          <div class="ref-item">
+            <div class="ref-name">Jesús Soria Castillo</div>
+            <div class="ref-org">Gerente — SC Impresiones</div>
+            <div class="ref-tel">55 8232 1553</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PAGE 4: Referencias ── -->
+      <div class="page page-right" id="p4">
+        <div class="page-front page-content">
+          <div class="page-heading"><span>04</span> / Referencias</div>
+          <div class="sec-title">Validación Profesional</div>
+
+          <div class="ref-item">
+            <div class="ref-name">Perla Vargas Servín</div>
+            <div class="ref-org">Directivo, LTP Global Software</div>
+            <div class="ref-tel"><i class='bx bx-phone' style="font-size:.9rem;vertical-align:middle;margin-right:.3rem"></i>55 5413 9231</div>
+            <div class="exp-desc" style="margin-top:.3rem">Supervisora directa durante el periodo de trabajo en LTP Global Software. Puede confirmar habilidades técnicas en Axxon One, cámaras IP y desempeño general.</div>
+          </div>
+          <hr class="exp-divider" />
+          <div class="ref-item">
+            <div class="ref-name">Jesús Soria Castillo</div>
+            <div class="ref-org">Gerente, SC Impresiones</div>
+            <div class="ref-tel"><i class='bx bx-phone' style="font-size:.9rem;vertical-align:middle;margin-right:.3rem"></i>55 8232 1553</div>
+            <div class="exp-desc" style="margin-top:.3rem">Jefe directo en SC Impresiones. Puede validar responsabilidad, soporte técnico y operación de maquinaria especializada.</div>
+          </div>
+        </div>
+        <div class="page-back page-content">
+          <div class="page-heading"><span>05</span> / Contacto — intro</div>
+          <div class="sec-title">Hablemos</div>
+          <div class="exp-desc" style="line-height:1.7">
+            Estoy disponible para proyectos freelance, prácticas profesionales o colaboraciones en el área de sistemas, automatización y desarrollo web. No dudes en escribirme.
+          </div>
+          <div class="contact-direct" style="margin-top:.5rem">
+            <div class="contact-row"><i class='bx bx-phone'></i>55 2967 2982</div>
+            <div class="contact-row"><i class='bx bx-envelope'></i>orejelfernando51@gmail.com</div>
+            <div class="contact-row"><i class='bx bx-map'></i>CDMX, México</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PAGE 5: Acerca de ── -->
+      <div class="page page-right" id="p5">
+        <div class="page-front page-content">
+          <div class="page-heading"><span>05</span> / Acerca de</div>
+          <div class="sec-title">¿Quién soy?</div>
+          <div class="exp-desc" style="line-height:1.8;font-size:.8rem">
+            Soy Fernando Gamiochipi Orejel, estudiante de Ingeniería en Sistemas en la Universidad Anáhuac Norte. Co-fundador de AOVA, un estudio de software donde construyo herramientas, automatizaciones y demos comerciales para clientes.
+            <br/><br/>
+            Tengo experiencia real en videovigilancia IP con Axxon One, desarrollo con Python, JavaScript y frameworks modernos, y un fuerte interés por la inteligencia artificial aplicada a productos reales.
+            <br/><br/>
+            Me manejo con autonomía, aprendo rápido y me apasiona construir cosas que funcionen de verdad.
+          </div>
+
+          <div class="sec-title" style="margin-top:.5rem">Valores de trabajo</div>
+          <div class="tag-list">
+            <span class="tag">Autonomía</span>
+            <span class="tag">Velocidad de aprendizaje</span>
+            <span class="tag">Orientado a resultados</span>
+            <span class="tag">Comunicación directa</span>
+            <span class="tag">Calidad antes que cantidad</span>
+          </div>
+        </div>
+        <div class="page-back page-content">
+          <div class="page-heading"><span>06</span> / Contacto — form</div>
+          <div class="sec-title" style="text-align:center">Envíame un mensaje</div>
+        </div>
+      </div>
+
+      <!-- ── PAGE 6: Contacto ── -->
+      <div class="page page-right" id="p6">
+        <div class="page-front page-content" id="contact-page">
+          <div class="page-heading"><span>06</span> / Contacto</div>
+          <div class="sec-title">Envíame un mensaje</div>
+
+          <form class="contact-form" action="mailto:orejelfernando51@gmail.com" method="get" enctype="text/plain">
+            <div class="contact-field">
+              <label>Nombre</label>
+              <input type="text" name="Nombre" placeholder="Tu nombre" required />
+            </div>
+            <div class="contact-field">
+              <label>Asunto</label>
+              <input type="text" name="subject" placeholder="Asunto del mensaje" required />
+            </div>
+            <div class="contact-field">
+              <label>Mensaje</label>
+              <textarea name="body" rows="4" placeholder="Tu mensaje..."></textarea>
+            </div>
+            <button class="contact-submit" type="submit">Enviar mensaje</button>
+          </form>
+
+          <div class="contact-direct" style="margin-top:.5rem">
+            <div class="contact-row"><i class='bx bx-phone'></i>55 2967 2982</div>
+            <div class="contact-row"><i class='bx bx-envelope'></i>orejelfernando51@gmail.com</div>
+            <div class="contact-row"><i class='bx bx-map'></i>CDMX, México</div>
+          </div>
+        </div>
+        <div class="page-back page-content">
+          <!-- intentionally blank — back of last page -->
+        </div>
+      </div>
+
+    </div><!-- /book -->
+  </div><!-- /wrapper -->
+
+  <!-- buttons below book -->
+  <div class="contact-btn-wrap" id="book-controls">
+    <button class="nav-btn prev" id="prev-btn" disabled><i class='bx bx-chevron-left'></i></button>
+    <span class="page-counter" id="page-counter">Portada</span>
+    <button class="nav-btn next" id="next-btn"><i class='bx bx-chevron-right'></i></button>
+  </div>
+  <div class="contact-btn-wrap">
+    <button class="contact-btn" id="contact-me-btn">Contact Me</button>
+    <button class="contact-btn secondary" id="back-btn" style="display:none">Volver al inicio</button>
+  </div>
+
+  <!-- ══════════════ MOBILE CV ══════════════ -->
+  <div class="mobile-cv">
+
+    <!-- profile -->
+    <div class="mob-card mob-profile">
+      <img src="foto_perfil.jpg" alt="Fernando Gamiochipi" class="mob-profile-photo" />
+      <div class="mob-name">Fernando Gamiochipi Orejel</div>
+      <div class="mob-sub">Estudiante de Ingeniería en Sistemas</div>
+      <span class="mob-badge">Disponible para proyectos junior tech</span>
+      <div class="mob-contact-row"><i class='bx bx-phone'></i>55 2967 2982</div>
+      <div class="mob-contact-row"><i class='bx bx-envelope'></i>orejelfernando51@gmail.com</div>
+      <div class="mob-contact-row"><i class='bx bx-map'></i>CDMX, México</div>
+    </div>
+
+    <!-- experience -->
+    <div class="mob-card">
+      <div class="mob-card-head">Experiencia</div>
+      <div style="display:flex;flex-direction:column;gap:.8rem">
+        <div>
+          <div class="mob-exp-role">Co-Fundador &amp; Dev Lead</div>
+          <div class="mob-exp-company">AOVA</div>
+          <div class="mob-exp-date">2025 – Presente</div>
+          <div class="mob-exp-desc">MVPs, automatizaciones IA y demos comerciales para clientes.</div>
+        </div>
+        <hr class="mob-divider" />
+        <div>
+          <div class="mob-exp-role">Técnico en Videovigilancia IP</div>
+          <div class="mob-exp-company">LTP Global Software</div>
+          <div class="mob-exp-date">Sep 2024 – Sep 2025</div>
+          <div class="mob-exp-desc">Axxon One, cámaras IP, NVR, redes de videovigilancia.</div>
+        </div>
+        <hr class="mob-divider" />
+        <div>
+          <div class="mob-exp-role">Operador &amp; Soporte Técnico</div>
+          <div class="mob-exp-company">SC Impresiones</div>
+          <div class="mob-exp-date">Ene 2024 – Sep 2024</div>
+        </div>
+        <hr class="mob-divider" />
+        <div>
+          <div class="mob-exp-role">Supervisor de Operaciones</div>
+          <div class="mob-exp-company">VS Cleaning</div>
+          <div class="mob-exp-date">Jul 2021 – Ago 2023</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- skills -->
+    <div class="mob-card">
+      <div class="mob-card-head">Habilidades</div>
+      <div style="display:flex;flex-direction:column;gap:.6rem">
+        <div class="mob-skill">
+          <div class="mob-skill-label">Axxon One / CCTV <span>90%</span></div>
+          <div class="mob-skill-track"><div class="mob-skill-bar" data-width="90" style="width:0%"></div></div>
+        </div>
+        <div class="mob-skill">
+          <div class="mob-skill-label">Cámaras IP &amp; NVR <span>92%</span></div>
+          <div class="mob-skill-track"><div class="mob-skill-bar" data-width="92" style="width:0%"></div></div>
+        </div>
+        <div class="mob-skill">
+          <div class="mob-skill-label">IA &amp; Prompt Engineering <span>85%</span></div>
+          <div class="mob-skill-track"><div class="mob-skill-bar" data-width="85" style="width:0%"></div></div>
+        </div>
+        <div class="mob-skill">
+          <div class="mob-skill-label">Python <span>85%</span></div>
+          <div class="mob-skill-track"><div class="mob-skill-bar" data-width="85" style="width:0%"></div></div>
+        </div>
+        <div class="mob-skill">
+          <div class="mob-skill-label">JavaScript <span>75%</span></div>
+          <div class="mob-skill-track"><div class="mob-skill-bar blue" data-width="75" style="width:0%"></div></div>
+        </div>
+      </div>
+      <div class="mob-tag-list" style="margin-top:.5rem">
+        <span class="mob-tag">Redes IP</span>
+        <span class="mob-tag">Flask</span>
+        <span class="mob-tag">React</span>
+        <span class="mob-tag">Git</span>
+        <span class="mob-tag">Linux CLI</span>
+        <span class="mob-tag">Illustrator</span>
+        <span class="mob-tag">AutoCAD</span>
+      </div>
+    </div>
+
+    <!-- education -->
+    <div class="mob-card">
+      <div class="mob-card-head">Formación</div>
+      <div class="mob-exp-role" style="color:var(--white-color)">Ingeniería en Sistemas Computacionales</div>
+      <div class="mob-exp-company">Universidad Anáhuac Norte</div>
+      <div class="mob-exp-date">Enero 2025 – Presente</div>
+      <div class="mob-tag-list" style="margin-top:.5rem">
+        <span class="mob-tag">Español — Nativo</span>
+        <span class="mob-tag">Inglés — C1 Avanzado</span>
+      </div>
+    </div>
+
+    <!-- references -->
+    <div class="mob-card">
+      <div class="mob-card-head">Referencias</div>
+      <div style="display:flex;flex-direction:column;gap:.7rem">
+        <div>
+          <div class="mob-ref-name">Perla Vargas Servín</div>
+          <div class="mob-ref-org">Directivo — LTP Global Software</div>
+          <div class="mob-ref-tel">55 5413 9231</div>
+        </div>
+        <hr class="mob-divider" />
+        <div>
+          <div class="mob-ref-name">Jesús Soria Castillo</div>
+          <div class="mob-ref-org">Gerente — SC Impresiones</div>
+          <div class="mob-ref-tel">55 8232 1553</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- contact -->
+    <div class="mob-card">
+      <div class="mob-card-head">Contacto</div>
+      <a href="mailto:orejelfernando51@gmail.com" class="mob-contact-btn">Enviar email</a>
+    </div>
+
+  </div>
+
+  <script>
+    (function () {
+      var TOTAL_PAGES = 6;
+      var current = 0; // 0 = cover, 1..6 = pages
+
+      var pages = [];
+      for (var i = 1; i <= TOTAL_PAGES; i++) {
+        pages.push(document.getElementById('p' + i));
+      }
+      var coverRight = document.getElementById('cover-right');
+      var prevBtn    = document.getElementById('prev-btn');
+      var nextBtn    = document.getElementById('next-btn');
+      var counter    = document.getElementById('page-counter');
+      var contactBtn = document.getElementById('contact-me-btn');
+      var backBtn    = document.getElementById('back-btn');
+
+      function updateCounter() {
+        if (current === 0) counter.textContent = 'Portada';
+        else counter.textContent = current + ' / ' + TOTAL_PAGES;
+      }
+
+      function flipTo(n) {
+        // flip cover
+        if (n > 0) coverRight.classList.add('turn');
+        else       coverRight.classList.remove('turn');
+
+        // flip pages
+        for (var i = 0; i < TOTAL_PAGES; i++) {
+          if (i < n) pages[i].classList.add('turn');
+          else       pages[i].classList.remove('turn');
+        }
+
+        current = n;
+        prevBtn.disabled = (n === 0);
+        nextBtn.disabled = (n === TOTAL_PAGES);
+
+        // show/hide back button
+        if (n === TOTAL_PAGES) {
+          backBtn.style.display = 'inline-block';
+          contactBtn.style.display = 'none';
+        } else if (n === 0) {
+          backBtn.style.display = 'none';
+          contactBtn.style.display = 'inline-block';
+        } else {
+          backBtn.style.display = 'none';
+          contactBtn.style.display = 'inline-block';
+        }
+
+        updateCounter();
+        animateSkillBars();
+      }
+
+      prevBtn.addEventListener('click', function () {
+        if (current > 0) flipTo(current - 1);
+      });
+      nextBtn.addEventListener('click', function () {
+        if (current < TOTAL_PAGES) flipTo(current + 1);
+      });
+
+      contactBtn.addEventListener('click', function () {
+        flipTo(TOTAL_PAGES);
+      });
+      backBtn.addEventListener('click', function () {
+        flipTo(0);
+      });
+
+      // keyboard navigation
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowRight' && current < TOTAL_PAGES) flipTo(current + 1);
+        if (e.key === 'ArrowLeft'  && current > 0)           flipTo(current - 1);
+      });
+
+      // opening animation — cover flips after 2100ms
+      setTimeout(function () { flipTo(0); }, 100); // initial state
+      // keep closed; open is user-driven (auto-open removed per spec — cover stays closed)
+
+      updateCounter();
+
+      // skill bar animation
+      function animateSkillBars() {
+        var bars = document.querySelectorAll('.skill-bar[data-width]');
+        bars.forEach(function (bar) {
+          var w = bar.getAttribute('data-width');
+          // small delay so transition is visible after flip
+          setTimeout(function () { bar.style.width = w + '%'; }, 100);
+        });
+      }
+
+      // IntersectionObserver for mobile skill bars
+      if ('IntersectionObserver' in window) {
+        var mobBars = document.querySelectorAll('.mob-skill-bar[data-width]');
+        var obs = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              var bar = entry.target;
+              bar.style.width = bar.getAttribute('data-width') + '%';
+              obs.unobserve(bar);
+            }
+          });
+        }, { threshold: 0.3 });
+        mobBars.forEach(function (b) { obs.observe(b); });
+      }
+    })();
+  </script>
+</body>
+</html>
